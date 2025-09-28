@@ -30,6 +30,7 @@
 #include <rmw_microxrcedds_c/config.h>
 #include <rmw_microros/rmw_microros.h>
 
+#include <math.h>
 #include <std_msgs/msg/int32.h>
 #include <geometry_msgs/msg/twist.h>
 #include <nav_msgs/msg/odometry.h>
@@ -49,11 +50,14 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){printf("Failed status on line %d: %d. Aborting.\n",__LINE__,(int)temp_rc); return 1;}}
+#define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){printf("Failed status on line %d: %d. Aborting.\n",__LINE__,(int)temp_rc); }}
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){printf("Failed status on line %d: %d. Continuing.\n",__LINE__,(int)temp_rc);}}
 /* USER CODE END PM */
 
-/* Private variables ---------------------------------------------------------*/
+/* Private variables
+ *  ---------------------------------------------------------*/
+I2C_HandleTypeDef hi2c2;
+
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart2_rx;
 DMA_HandleTypeDef hdma_usart2_tx;
@@ -74,6 +78,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_I2C2_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -82,10 +87,18 @@ void StartDefaultTask(void *argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+#define ADD  0xD0
+#define RTD  57.2957
 geometry_msgs__msg__Twist msg_cmd_vel;
 double v, omega;
 double R = 5, L = 20;
 double vl, vr;
+
+int16_t ax = 0 , ay = 0 , az = 0 , gx =0 , gy = 0 , gz = 0;
+float AX,AY,AZ,GX,GY,GZ;
+
+double pitch = 0,roll = 0, yaw = 0;
+
 void cmd_vel_callback(const void * msgin)
 {
   // Cast received message to used type
@@ -98,6 +111,58 @@ void cmd_vel_callback(const void * msgin)
    vr = (2 * v + omega * L) / (2 * R);
   HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 }
+
+void MPU6050Init(void){
+  uint8_t check;
+  uint8_t mdata;
+  HAL_I2C_Mem_Read(&hi2c2,ADD, 0x75 ,1, &check,1,1000);
+  if(check == 0x68){
+    mdata = 0x00;
+    HAL_I2C_Mem_Write(&hi2c2,ADD,0x6B,1,&mdata,1,1000);
+    mdata = 0x07;
+    HAL_I2C_Mem_Write(&hi2c2,ADD,0x19,1,&mdata,1,1000);
+    mdata = 0x00;
+    HAL_I2C_Mem_Write(&hi2c2,ADD,0x1B,1,&mdata,1,1000);
+    mdata = 0x00;
+    HAL_I2C_Mem_Write(&hi2c2,ADD,0x1C,1,&mdata,1,1000);
+  }
+}
+
+
+void MPU6050ReadG(void){
+  uint8_t dataG[6];
+
+  HAL_I2C_Mem_Read(&hi2c2 ,ADD,0x43 ,1 , dataG,6,1000);
+  gx = (int16_t)(dataG[0] << 8 | dataG[1]);
+  gy = (int16_t)(dataG[2] << 8 | dataG[3]);
+  gz = (int16_t)(dataG[4] << 8 | dataG[5]);
+  GX = (float)gx /131.0;
+  GY = (float)gy /131.0;
+  GZ = (float)gz /131.0;
+
+}
+void MPU6050ReadA(void){
+  uint8_t dataA[6];
+  HAL_I2C_Mem_Read(&hi2c2 ,ADD,0x3B ,1 , dataA,6,1000);
+  ax = (int16_t)(dataA[0] << 8 | dataA[1]);
+  ay = (int16_t)(dataA[2] << 8 | dataA[3]);
+  az = (int16_t)(dataA[4] << 8 | dataA[5]);
+  AX = (float)ax /16384.0;
+  AY = (float)ay /16384.0;
+  AZ = (float)az /16384.0;
+}
+void filter(float AX,float AY,float AZ,float GX,float GY,float GZ){
+  float pitchG = pitch +GX*(1000/1000000.0f);
+  float rollG = roll +GY*(1000/1000000.0f);
+
+  float pitchA = atan2(AY,sqrt(AX*AX+AZ*AZ));
+  float rollA = atan2(AX,sqrt(AY*AY+AZ*AZ));
+
+  pitch = 0.98*pitchG + 0.02*pitchA ;
+  roll = 0.98*rollG + 0.02*rollA;
+  yaw = yaw   + GZ *(1000/1000000.0f);
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -131,8 +196,9 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART2_UART_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
-
+  MPU6050Init();
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -178,6 +244,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+//	  MPU6050ReadA();
+//	  MPU6050ReadG();
+//	  filter(AX, AY, AZ, GX, GY,GZ);
+//	  vTaskDelay(pdMS_TO_TICKS(10));
   }
   /* USER CODE END 3 */
 }
@@ -221,6 +291,40 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief I2C2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C2_Init(void)
+{
+
+  /* USER CODE BEGIN I2C2_Init 0 */
+
+  /* USER CODE END I2C2_Init 0 */
+
+  /* USER CODE BEGIN I2C2_Init 1 */
+
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.ClockSpeed = 100000;
+  hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C2_Init 2 */
+
+  /* USER CODE END I2C2_Init 2 */
+
 }
 
 /**
@@ -291,6 +395,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
@@ -317,15 +422,6 @@ void * microros_allocate(size_t size, void * state);
 void microros_deallocate(void * pointer, void * state);
 void * microros_reallocate(void * pointer, size_t size, void * state);
 void * microros_zero_allocate(size_t number_of_elements, size_t size_of_element, void * state);
-/* USER CODE END 4 */
-
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_StartDefaultTask */
 
 
 rcl_publisher_t odom_pub, tf_pub;
@@ -338,8 +434,25 @@ nav_msgs__msg__Odometry odom_msg;
 geometry_msgs__msg__TransformStamped tf;
 tf2_msgs__msg__TFMessage tf_msg;
 double x_pos = 0, y_pos = 0, z_pos = 0;
-double vx = 2;
-double ax = 0, yaw = 0, v_yaw = 0;
+double vx = 1;
+double a_x = 0, v_yaw = 0;
+geometry_msgs__msg__Quaternion euler_to_quaternion(double roll, double pitch, double yaw) {
+    geometry_msgs__msg__Quaternion q;
+
+    double cy = cos(yaw * 0.5);
+    double sy = sin(yaw * 0.5);
+    double cp = cos(pitch * 0.5);
+    double sp = sin(pitch * 0.5);
+    double cr = cos(roll * 0.5);
+    double sr = sin(roll * 0.5);
+
+    q.w = cr * cp * cy + sr * sp * sy;
+    q.x = sr * cp * cy - cr * sp * sy;
+    q.y = cr * sp * cy + sr * cp * sy;
+    q.z = cr * cp * sy - sr * sp * cy;
+
+    return q;
+}
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 {
 	(void) last_call_time;
@@ -349,14 +462,17 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         odom_msg.header.stamp.sec     = time_ns / 1000000000ULL;
         odom_msg.header.stamp.nanosec = time_ns % 1000000000ULL;
 
+        geometry_msgs__msg__Quaternion q = euler_to_quaternion(roll, pitch, 0);
         // update data /odom
-        x_pos = x_pos + 0.05;
+
+        x_pos = x_pos;
         odom_msg.pose.pose.position.x = x_pos;
         odom_msg.pose.pose.position.y = y_pos;
         odom_msg.pose.pose.position.z = z_pos;
-        odom_msg.pose.pose.orientation.w = 1.0;
+        odom_msg.pose.pose.orientation = q;
         odom_msg.twist.twist.linear.x = 0.05;
         odom_msg.twist.twist.angular.z = 0.0;
+
 
         tf.header.stamp.sec = time_ns / 1000000000ULL;
         tf.header.stamp.nanosec = time_ns % 1000000000ULL;
@@ -365,10 +481,7 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         tf.transform.translation.y = y_pos;
         tf.transform.translation.z = z_pos;
 
-        tf.transform.rotation.x = 0.0;
-        tf.transform.rotation.y = 0.0;
-        tf.transform.rotation.z = 0.0;
-        tf.transform.rotation.w = 1.0;
+        tf.transform.rotation = q;
 
         tf_msg.transforms.data = &tf;
         tf_msg.transforms.size = 1;
@@ -377,7 +490,15 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 		RCSOFTCHECK(rcl_publish(&tf_pub, &tf_msg, NULL));
 	}
 }
+/* USER CODE END 4 */
 
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
@@ -456,14 +577,14 @@ void StartDefaultTask(void *argument)
     // init data odom
     odom_msg.header.frame_id.data = "odom";
     odom_msg.child_frame_id.data  = "base_link";
-    odom_msg.pose.pose.position.x = x_pos;
-    odom_msg.pose.pose.position.y = y_pos;
-    odom_msg.pose.pose.position.z = z_pos;
-    odom_msg.pose.pose.orientation.w = 1.0;
 
     tf.header.frame_id.data = "odom";
     tf.child_frame_id.data = "base_link";
 	while(1) {
+		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+		MPU6050ReadA();
+		MPU6050ReadG();
+		filter(AX, AY, AZ, GX, GY,GZ);
 		rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
 		vTaskDelay(pdMS_TO_TICKS(1));
 	}
