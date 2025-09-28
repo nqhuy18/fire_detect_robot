@@ -54,20 +54,33 @@
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){printf("Failed status on line %d: %d. Continuing.\n",__LINE__,(int)temp_rc);}}
 /* USER CODE END PM */
 
-/* Private variables
- *  ---------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c2;
 
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart2_rx;
 DMA_HandleTypeDef hdma_usart2_tx;
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
+/* Definitions for myTask1 */
+osThreadId_t myTask1Handle;
+const osThreadAttr_t myTask1_attributes = {
+  .name = "myTask1",
   .stack_size = 3000 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityNormal1,
+};
+/* Definitions for myTask02 */
+osThreadId_t myTask02Handle;
+const osThreadAttr_t myTask02_attributes = {
+  .name = "myTask02",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal1,
+};
+/* Definitions for myTask03 */
+osThreadId_t myTask03Handle;
+const osThreadAttr_t myTask03_attributes = {
+  .name = "myTask03",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal2,
 };
 /* USER CODE BEGIN PV */
 
@@ -79,7 +92,9 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C2_Init(void);
-void StartDefaultTask(void *argument);
+void Task_pub_sub(void *argument);
+void Task_IMU(void *argument);
+void Task_control(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -93,12 +108,9 @@ geometry_msgs__msg__Twist msg_cmd_vel;
 double v, omega;
 double R = 5, L = 20;
 double vl, vr;
-
 int16_t ax = 0 , ay = 0 , az = 0 , gx =0 , gy = 0 , gz = 0;
 float AX,AY,AZ,GX,GY,GZ;
-
 double pitch = 0,roll = 0, yaw = 0;
-
 void cmd_vel_callback(const void * msgin)
 {
   // Cast received message to used type
@@ -111,7 +123,6 @@ void cmd_vel_callback(const void * msgin)
    vr = (2 * v + omega * L) / (2 * R);
   HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 }
-
 void MPU6050Init(void){
   uint8_t check;
   uint8_t mdata;
@@ -127,8 +138,6 @@ void MPU6050Init(void){
     HAL_I2C_Mem_Write(&hi2c2,ADD,0x1C,1,&mdata,1,1000);
   }
 }
-
-
 void MPU6050ReadG(void){
   uint8_t dataG[6];
 
@@ -163,6 +172,7 @@ void filter(float AX,float AY,float AZ,float GX,float GY,float GZ){
   yaw = yaw   + GZ *(1000/1000000.0f);
 }
 
+double cnt_pub = 0, cnt_imu = 0, cnt_control = 0;
 /* USER CODE END 0 */
 
 /**
@@ -221,8 +231,14 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  /* creation of myTask1 */
+  myTask1Handle = osThreadNew(Task_pub_sub, NULL, &myTask1_attributes);
+
+  /* creation of myTask02 */
+  myTask02Handle = osThreadNew(Task_IMU, NULL, &myTask02_attributes);
+
+  /* creation of myTask03 */
+  myTask03Handle = osThreadNew(Task_control, NULL, &myTask03_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -244,10 +260,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	  MPU6050ReadA();
-//	  MPU6050ReadG();
-//	  filter(AX, AY, AZ, GX, GY,GZ);
-//	  vTaskDelay(pdMS_TO_TICKS(10));
+	//Task Control
   }
   /* USER CODE END 3 */
 }
@@ -492,14 +505,14 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 }
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
+/* USER CODE BEGIN Header_Task_pub_sub */
 /**
-  * @brief  Function implementing the defaultTask thread.
+  * @brief  Function implementing the myTask1 thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
+/* USER CODE END Header_Task_pub_sub */
+void Task_pub_sub(void *argument)
 {
   /* USER CODE BEGIN 5 */
 
@@ -581,14 +594,50 @@ void StartDefaultTask(void *argument)
     tf.header.frame_id.data = "odom";
     tf.child_frame_id.data = "base_link";
 	while(1) {
+		cnt_pub++;
 		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+		rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
+	}
+  /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_Task_IMU */
+/**
+* @brief Function implementing the myTask02 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Task_IMU */
+void Task_IMU(void *argument)
+{
+  /* USER CODE BEGIN Task_IMU */
+  /* Infinite loop */
+  while(1) {
+	    cnt_imu++;
 		MPU6050ReadA();
 		MPU6050ReadG();
 		filter(AX, AY, AZ, GX, GY,GZ);
-		rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
 		vTaskDelay(pdMS_TO_TICKS(1));
-	}
-  /* USER CODE END 5 */
+  }
+  /* USER CODE END Task_IMU */
+}
+
+/* USER CODE BEGIN Header_Task_control */
+/**
+* @brief Function implementing the myTask03 thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Task_control */
+void Task_control(void *argument)
+{
+  /* USER CODE BEGIN Task_control */
+  /* Infinite loop */
+  while(1) {
+		cnt_control++;
+		vTaskDelay(pdMS_TO_TICKS(5));
+  }
+  /* USER CODE END Task_control */
 }
 
 /**
