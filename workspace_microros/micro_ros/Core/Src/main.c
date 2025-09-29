@@ -106,7 +106,7 @@ void Task_control(void *argument);
 #define RTD  57.2957
 geometry_msgs__msg__Twist msg_cmd_vel;
 double v, omega;
-double R = 5, L = 20;
+double R = 3.4, L = 30;
 double vl, vr;
 int16_t ax = 0 , ay = 0 , az = 0 , gx =0 , gy = 0 , gz = 0;
 float AX,AY,AZ,GX,GY,GZ;
@@ -119,8 +119,8 @@ void cmd_vel_callback(const void * msgin)
    v = msg->linear.x;
    omega = msg->angular.z;
 
-   vl = (2 * v - omega * L) / (2 * R);
-   vr = (2 * v + omega * L) / (2 * R);
+   vl = (2 * v - omega * L) / 2; // rad/s
+   vr = (2 * v + omega * L) / 2; // rad/s
   HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 }
 void MPU6050Init(void){
@@ -260,7 +260,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	//Task Control
   }
   /* USER CODE END 3 */
 }
@@ -447,8 +446,8 @@ nav_msgs__msg__Odometry odom_msg;
 geometry_msgs__msg__TransformStamped tf;
 tf2_msgs__msg__TFMessage tf_msg;
 double x_pos = 0, y_pos = 0, z_pos = 0;
-double vx = 1;
-double a_x = 0, v_yaw = 0;
+double vx = 0, vy = 0;
+double v_yaw = 0;
 geometry_msgs__msg__Quaternion euler_to_quaternion(double roll, double pitch, double yaw) {
     geometry_msgs__msg__Quaternion q;
 
@@ -466,25 +465,49 @@ geometry_msgs__msg__Quaternion euler_to_quaternion(double roll, double pitch, do
 
     return q;
 }
+typedef struct Velocity {
+    double vx;      // m/s
+    double vy;      // m/s
+    double v_yaw;   // rad/s
+} Velocity;
+
+// Differential Drive Kinematic Model
+Velocity convertVrVlYaw(double vr, double vl, double yaw, double L) {
+    Velocity vel;
+    double v = (vr + vl) / 2.0;   // m/s
+    vel.vx = v * cos(yaw);
+    vel.vy = v * sin(yaw);
+    vel.v_yaw = (vr - vl) / L;    // rad/s
+
+    return vel;
+}
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 {
-	(void) last_call_time;
 	if (timer != NULL) {
 		//Get time actual from agent ros to mcu
+		static uint64_t last_time_ns = 0;
         uint64_t time_ns = rmw_uros_epoch_nanos();
         odom_msg.header.stamp.sec     = time_ns / 1000000000ULL;
         odom_msg.header.stamp.nanosec = time_ns % 1000000000ULL;
 
         geometry_msgs__msg__Quaternion q = euler_to_quaternion(roll, pitch, 0);
+        Velocity vel = convertVrVlYaw(vr, vl, 0, L);
         // update data /odom
 
-        x_pos = x_pos;
+        double dt = (time_ns - last_time_ns) / 1e9;
+        last_time_ns = time_ns;
+
+        x_pos = x_pos + vel.vx * dt;
+        y_pos = y_pos + vel.vy * dt;
+
         odom_msg.pose.pose.position.x = x_pos;
         odom_msg.pose.pose.position.y = y_pos;
         odom_msg.pose.pose.position.z = z_pos;
         odom_msg.pose.pose.orientation = q;
-        odom_msg.twist.twist.linear.x = 0.05;
-        odom_msg.twist.twist.angular.z = 0.0;
+
+        odom_msg.twist.twist.linear.x = vel.vx;
+        odom_msg.twist.twist.linear.y = vel.vy;
+        odom_msg.twist.twist.angular.z = omega;
 
 
         tf.header.stamp.sec = time_ns / 1000000000ULL;
