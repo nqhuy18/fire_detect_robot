@@ -24,7 +24,10 @@
 #include "pid.h"
 #include "Motor.h"
 #include "math.h"
-#include "mpu.h"         
+#include "mpu.h" 
+#include "math.h"
+
+#define RTD          57.2957		
 
 /* USER CODE END Includes */
 
@@ -34,7 +37,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-volatile float LSPD_dbg, RSPD_dbg; 
+volatile float YAW_dbg = 0.0f;
 
 
 /* USER CODE END PD */
@@ -62,11 +65,11 @@ UART_HandleTypeDef huart1;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_TIM1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_USART1_UART_Init(void);
-static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 /* USER CODE END PFP */
 
@@ -78,7 +81,11 @@ Motor Right_motor;
 Motor *pRight = &Right_motor;
 PID_TypeDef RPID;
 PID_TypeDef LPID;
-double u = 0;
+
+float yaw = 0;
+
+
+
 
 /* USER CODE END 0 */
 
@@ -101,7 +108,7 @@ int main(void)
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
-
+  
   /* Configure the system clock */
   SystemClock_Config();
 
@@ -112,11 +119,16 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
+  MX_TIM1_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USART1_UART_Init();
-  MX_TIM1_Init();
+	MPU6050_init();
+  HAL_Delay(100);                    // ch? c?m bi?n ?n d?nh
+  MPU6050_GyroZ_BiasCalib(500);      // d?ng yên khi calib
+  MPU6050_StartYaw_IT();             // b?t d?u d?c b?ng I2C interrupt
+  
   /* USER CODE BEGIN 2 */
 	 HAL_TIM_Base_Start_IT(&htim1);
 	 HAL_TIM_Encoder_Start_IT(&htim2, TIM_CHANNEL_ALL); //LEFT
@@ -146,24 +158,24 @@ int main(void)
    PID_SetOutputLimits(&RPID, -3199, 3199);
 	 
 	 
-	 Motor_SetTarget(&Left_motor,500);
-	 Motor_SetTarget(&Right_motor,500);
+	 Motor_SetTarget(&Left_motor,150);
+	 Motor_SetTarget(&Right_motor,150);
 	 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	u = Left_motor.encoder_count;
+	
 	
   while (1)
   {
     /* USER CODE END WHILE */
-   
-    /* USER CODE BEGIN 3 */
+      YAW_dbg = MPU6050_GetYawDeg();  
 		
+    /* USER CODE BEGIN 3 */
+		 
  
-    Motor_SetPwm(&Left_motor);
-    Motor_SetPwm(&Right_motor);
+  
   }
 	
   /* USER CODE END 3 */
@@ -209,7 +221,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     Error_Handler();
   }
@@ -363,9 +375,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 31;
+  htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 999;
+  htim3.Init.Period = 3199;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
@@ -492,22 +504,11 @@ static void MX_GPIO_Init(void)
   /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin : PC13 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB12 PB13 PB14 PB15 */
   GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
@@ -529,6 +530,8 @@ static void MX_GPIO_Init(void)
 		   PID_Compute(&LPID);
 		   Motor_GetSpeed(&Right_motor);
 		   PID_Compute(&RPID);
+		   Motor_SetPwm(&Left_motor);
+		   Motor_SetPwm(&Right_motor);
 		   
     }
 }

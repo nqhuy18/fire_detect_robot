@@ -7,9 +7,21 @@
 	#include "stdbool.h"
 	#include "pid.h"
 
-#define WHEEL_RADIUS_M        0.034f    
-#define TRACK_WIDTH_M         0.300f     
-#define ENCODER_PPR           1320      
+#define MOTOR_RPS_MAX    (330.0f/60.0f) /* ~5.5 rps n?u motor ~330rpm */
+
+
+#define ENCODER_PPR    1400
+
+
+
+#define WHEEL_RADIUS_M   0.034f   
+
+
+
+#define TRACK_WIDTH_M    0.30f    
+
+
+
 
 	typedef enum
 	{

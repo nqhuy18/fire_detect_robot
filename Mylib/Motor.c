@@ -5,21 +5,7 @@
 #include <math.h>
 
 
-#ifndef MOTOR_RPS_MAX
-#define MOTOR_RPS_MAX    (330.0f/60.0f) /* ~5.5 rps n?u motor ~330rpm */
-#endif
 
-#ifndef ENCODER_PPR
-#define ENCODER_PPR      1320.0f   // v? d?: PPR (ticks/rev) do du?c c?a encoder
-#endif
-
-#ifndef WHEEL_RADIUS_M
-#define WHEEL_RADIUS_M   0.034f    // 34 mm
-#endif
-
-#ifndef TRACK_WIDTH_M
-#define TRACK_WIDTH_M    0.30f     // 30 cm
-#endif
 
 
 
@@ -89,8 +75,8 @@ void Motor_GetSpeed(Motor *_motor)
 	{
 		_motor->encoder_count = __HAL_TIM_GET_COUNTER(_motor->htim_encoder);
 		_motor->delta_count = _motor->encoder_count - _motor->prev_count;
-
-		_motor->cur_speed = ( _motor->delta_count/ ENCODER_PPR) * (60.0 / (2 / 1000.0)); 
+    int sign = (_motor->id == LEFT) ? 1 : -1;
+		_motor->cur_speed = (sign)*( (double)(_motor->delta_count)/ ENCODER_PPR) * (60.0 / (2 / 1000.0)); 
 		_motor->prev_count = _motor->encoder_count;
 
 	}
