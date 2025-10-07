@@ -25,8 +25,11 @@
 #include "Motor.h"
 #include "math.h"
 #include "mpu.h" 
-#include "math.h"
 
+float Ax,Ay,Az,Gx,Gy,Gz;
+float pitch  ;
+float roll ;
+float yaw ;
 #define RTD          57.2957		
 
 /* USER CODE END Includes */
@@ -37,7 +40,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-volatile float YAW_dbg = 0.0f;
+
 
 
 /* USER CODE END PD */
@@ -82,7 +85,7 @@ Motor *pRight = &Right_motor;
 PID_TypeDef RPID;
 PID_TypeDef LPID;
 
-float yaw = 0;
+
 
 
 
@@ -108,7 +111,7 @@ int main(void)
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
-  
+
   /* Configure the system clock */
   SystemClock_Config();
 
@@ -124,11 +127,6 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USART1_UART_Init();
-	MPU6050_init();
-  HAL_Delay(100);                    // ch? c?m bi?n ?n d?nh
-  MPU6050_GyroZ_BiasCalib(500);      // d?ng yên khi calib
-  MPU6050_StartYaw_IT();             // b?t d?u d?c b?ng I2C interrupt
-  
   /* USER CODE BEGIN 2 */
 	 HAL_TIM_Base_Start_IT(&htim1);
 	 HAL_TIM_Encoder_Start_IT(&htim2, TIM_CHANNEL_ALL); //LEFT
@@ -143,8 +141,8 @@ int main(void)
 
 // --- Base timer for control loop (interrupt) ---
 	// Khoi tao 2 banh xe
-   Motor_Init(&Left_motor, LEFT,GPIOB, GPIO_PIN_12, GPIOB, GPIO_PIN_13,&htim3, TIM_CHANNEL_1, &htim2, 1, 1.2, 0.003);
-   Motor_Init(&Right_motor,RIGHT,GPIOB, GPIO_PIN_14, GPIOB, GPIO_PIN_15,&htim3, TIM_CHANNEL_2, &htim4	, 1, 1.2, 0.003);
+   Motor_Init(&Left_motor, LEFT,GPIOB, GPIO_PIN_12, GPIOB, GPIO_PIN_13,&htim3, TIM_CHANNEL_1, &htim2, 10, 1.2, 0.3);
+   Motor_Init(&Right_motor,RIGHT,GPIOB, GPIO_PIN_14, GPIOB, GPIO_PIN_15,&htim3, TIM_CHANNEL_2, &htim4	, 10 ,1.2, 0.3);
 	 
 	// Khoi tao PID
 	 PID(&LPID, &(pLeft->cur_speed),&(pLeft->Pid_output),&(pLeft->target_speed),pLeft->kp, pLeft->ki, pLeft->kd,_PID_P_ON_E, _PID_CD_DIRECT);
@@ -158,8 +156,11 @@ int main(void)
    PID_SetOutputLimits(&RPID, -3199, 3199);
 	 
 	 
-	 Motor_SetTarget(&Left_motor,150);
-	 Motor_SetTarget(&Right_motor,150);
+	 Motor_SetTarget(&Left_motor,200);
+	 Motor_SetTarget(&Right_motor,200);
+	 
+	 
+	  MPU6050_init();
 	 
   /* USER CODE END 2 */
 
@@ -170,10 +171,12 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-      YAW_dbg = MPU6050_GetYawDeg();  
-		
+
     /* USER CODE BEGIN 3 */
-		 
+		MPU6050_Read_Accel(&Ax,&Ay,&Az);
+		MPU6050_Read_Gyro(&Gx,&Gy,&Gz);
+		filter(&Ax,&Ay,&Az,&Gx,&Gy,&Gz,&pitch,&roll,&yaw);
+		
  
   
   }

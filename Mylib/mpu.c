@@ -1,114 +1,95 @@
-// mpu.c
+#include "math.h"
 #include "mpu.h"
+#define MPU6050_ADDR 0xD0
 
-#define MPU6050_ADDR        0xD0        // b?n dang dùng 8-bit addr này
-#define ACCEL_XOUT_H_REG    0x3B
-#define GYRO_CONFIG_REG     0x1B
-#define ACCEL_CONFIG_REG    0x1C
-#define SMPLRT_DIV_REG      0x19
-#define PWR_MGMT_1_REG      0x6B
-#define WHO_AM_I_REG        0x75
+#define SMPLRT_DIV_REG 0x19
+#define GYRO_CONFIG_REG 0x1B
+#define ACCEL_CONFIG_REG 0x1C
+#define ACCEL_XOUT_H_REG 0x3B
+#define TEMP_OUT_H_REG 0x41
+#define GYRO_XOUT_H_REG 0x43
+#define PWR_MGMT_1_REG 0x6B
+#define WHO_AM_I_REG 0x75
 
-extern I2C_HandleTypeDef hi2c1;
-
-// --- bi?n dùng cho IT streaming ---
-static volatile uint8_t imu_buf[14];
-static volatile float   yaw_deg = 0.0f;      // yaw tích luy
-static volatile float   gyro_bias_z = 0.0f;  // bias Gz (deg/s)
-static uint32_t         last_tick_ms = 0;
-
-// scale theo c?u hình FS_SEL=0 (±250 dps => 131 LSB/dps)
-#define GYRO_SENS_131  (131.0f)
-
-// Init g?c c?a b?n (d?c WHO_AM_I, config reg...) gi? nguyên:
+int16_t Accel_X_RAW, Accel_Y_RAW, Accel_Z_RAW;
+int16_t Gyro_X_RAW, Gyro_Y_RAW, Gyro_Z_RAW;
+float pitchA,rollA,pitchG	,rollG;
+//float Ax, Ay, Az, Gx, Gy, Gz;
+extern I2C_HandleTypeDef hi2c1;  // change your handler here accordingly
 void MPU6050_init(void)
 {
-    uint8_t check, data;
-    HAL_I2C_Mem_Read(&hi2c1, MPU6050_ADDR, WHO_AM_I_REG, I2C_MEMADD_SIZE_8BIT, &check, 1, 1000);
-    if (check == 104)
-    {
-        data = 0x00; 
-        HAL_I2C_Mem_Write(&hi2c1, MPU6050_ADDR, PWR_MGMT_1_REG, I2C_MEMADD_SIZE_8BIT, &data, 1, 1000);
+	uint8_t check,data;
+	HAL_I2C_Mem_Read(&hi2c1, MPU6050_ADDR, WHO_AM_I_REG, 1, &check, 1 , 1000);
+	if (check == 104)
+	{
+		//Power management register write all 0's to wake up sensor
+		data = 0;
+		HAL_I2C_Mem_Write(&hi2c1,MPU6050_ADDR, PWR_MGMT_1_REG, 1, &data, 1, 1000);
+		//Set data rate of 1KHz by writing SMPRT_DIV register
+		data = 0x07;
+		HAL_I2C_Mem_Write(&hi2c1, MPU6050_ADDR, SMPLRT_DIV_REG, 1, &data, 1, 1000);
+		//Writing both register with 0 to set full scale range
+		data = 0x00;
+		HAL_I2C_Mem_Write(&hi2c1, MPU6050_ADDR, ACCEL_CONFIG_REG, 1, &data, 1, 1000);
+		
+		data = 0x00;
+		HAL_I2C_Mem_Write(&hi2c1, MPU6050_ADDR, GYRO_CONFIG_REG, 1, &data, 1, 1000);
+	}
 
-        data = 0x07; 
-        HAL_I2C_Mem_Write(&hi2c1, MPU6050_ADDR, SMPLRT_DIV_REG, I2C_MEMADD_SIZE_8BIT, &data, 1, 1000);
-
-        data = 0x00; 
-        HAL_I2C_Mem_Write(&hi2c1, MPU6050_ADDR, ACCEL_CONFIG_REG, I2C_MEMADD_SIZE_8BIT, &data, 1, 1000);
-
-        data = 0x00; 
-        HAL_I2C_Mem_Write(&hi2c1, MPU6050_ADDR, GYRO_CONFIG_REG, I2C_MEMADD_SIZE_8BIT, &data, 1, 1000);
-    }
 }
 
-void MPU6050_GyroZ_BiasCalib(uint16_t n_samples)
+//Function with multiple return using pointer
+
+void MPU6050_Read_Accel (float* Ax, float* Ay, float* Az)
 {
-    int32_t sum = 0;
-    uint8_t gbuf[6];
+	uint8_t Rec_Data[6];
 
-    for (uint16_t i = 0; i < n_samples; i++)
-    {
-        HAL_I2C_Mem_Read(&hi2c1, MPU6050_ADDR, 0x43, I2C_MEMADD_SIZE_8BIT, gbuf, 6, 100);
-        int16_t gz_raw = (int16_t)((gbuf[4] << 8) | gbuf[5]);
-        sum += gz_raw;
-        HAL_Delay(2); 
-    }
-
-    float gz_avg_raw = (float)sum / (float)n_samples;
-    gyro_bias_z = gz_avg_raw / GYRO_SENS_131; 
+	HAL_I2C_Mem_Read (&hi2c1, MPU6050_ADDR, ACCEL_XOUT_H_REG, 1, Rec_Data, 6, 1000);
+	//Adding 2 BYTES into 16 bit integer 
+	Accel_X_RAW = (int16_t)(Rec_Data[0] << 8 | Rec_Data [1]);
+	Accel_Y_RAW = (int16_t)(Rec_Data[2] << 8 | Rec_Data [3]);
+	Accel_Z_RAW = (int16_t)(Rec_Data[4] << 8 | Rec_Data [5]);
+	
+	*Ax = Accel_X_RAW*100/16384.0;
+	*Ay = Accel_Y_RAW*100/16384.0;
+	*Az = Accel_Z_RAW*100/16384.0;
 }
 
-
-void MPU6050_StartYaw_IT(void)
+void MPU6050_Read_Gyro(float* Gx, float* Gy, float* Gz)
 {
-    last_tick_ms = HAL_GetTick();
-    HAL_I2C_Mem_Read_IT(&hi2c1, MPU6050_ADDR,
-                        ACCEL_XOUT_H_REG, I2C_MEMADD_SIZE_8BIT,
-                        (uint8_t*)imu_buf, 14);
+    uint8_t Rec_Data[6];
+    HAL_I2C_Mem_Read(&hi2c1, MPU6050_ADDR, GYRO_XOUT_H_REG, 1, Rec_Data, 6, 1000);
+
+    // Correctly assign raw data values for each axis
+    Gyro_X_RAW = (int16_t)(Rec_Data[0] << 8 | Rec_Data[1]);
+    Gyro_Y_RAW = (int16_t)(Rec_Data[2] << 8 | Rec_Data[3]);
+    Gyro_Z_RAW = (int16_t)(Rec_Data[4] << 8 | Rec_Data[5]);
+
+    *Gx = Gyro_X_RAW / 131.0;
+    *Gy = Gyro_Y_RAW / 131.0;
+    *Gz = Gyro_Z_RAW / 131.0;
 }
 
-
-void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c)
-{
-    if (hi2c == &hi2c1)
-    {
-        
-        int16_t gz_raw = (int16_t)((imu_buf[12] << 8) | imu_buf[13]);
-        float   gz_dps = (gz_raw / GYRO_SENS_131) - gyro_bias_z;
-
-        uint32_t now = HAL_GetTick();
-        float dt = (now - last_tick_ms) * 0.001f; 
-        last_tick_ms = now;
-
-        yaw_deg += gz_dps * dt;
-
-       
-        if (yaw_deg > 180.0f)      yaw_deg -= 360.0f;
-        else if (yaw_deg < -180.0f) yaw_deg += 360.0f;
-
-      
-        HAL_I2C_Mem_Read_IT(&hi2c1, MPU6050_ADDR,
-                            ACCEL_XOUT_H_REG, I2C_MEMADD_SIZE_8BIT,
-                            (uint8_t*)imu_buf, 14);
-    }
+void filter(float* Ax, float* Ay, float* Az , float* Gx, float* Gy, float* Gz,float* pitch,float* roll,float* yaw){
+	 pitchG = *pitch +*Gx*(1000/1000000.0f);
+	 rollG = *roll + *Gy*(1000/1000000.0f);
+	
+	 pitchA = atan2(*Ay,sqrt(*Ax**Ax+*Az**Az))*RTD;
+	 rollA = atan2(*Ax,sqrt(*Ay**Ay+*Az**Az))*RTD;
+	
+	*pitch = 0.98*pitchG + 0.02*pitchA;
+	*roll = 0.98*rollG + 0.02*rollA;
+	*yaw = *yaw + *Gz * (1000/1000000.0f);
+	
 }
-
-
-void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
-{
-    if (hi2c == &hi2c1)
-    {
-        HAL_I2C_DeInit(&hi2c1);
-        HAL_I2C_Init(&hi2c1);
-        
-        last_tick_ms = HAL_GetTick();
-        HAL_I2C_Mem_Read_IT(&hi2c1, MPU6050_ADDR,
-                            ACCEL_XOUT_H_REG, I2C_MEMADD_SIZE_8BIT,
-                            (uint8_t*)imu_buf, 14);
-    }
-}
-
-float MPU6050_GetYawDeg(void)
-{
-    return yaw_deg;
-}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
