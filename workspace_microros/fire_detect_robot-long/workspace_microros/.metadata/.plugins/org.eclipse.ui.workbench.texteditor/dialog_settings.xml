@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item key="hasShownOverlayPopupBefore" value="true"/>
+	<item key="replaceBarOpen" value="false"/>
+	<list key="searchhistory">
+		<item value="rc"/>
+		<item value="subscriber"/>
+		<item value="executor"/>
+		<item value="msg"/>
+		<item value="std_msgs"/>
+		<item value="rcl"/>
+		<item value="parameter_events"/>
+		<item value="StartDefaultTask"/>
+	</list>
+</section>
