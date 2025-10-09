@@ -49,7 +49,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-uint32_t dt;
+float dt;
 float Ax,Ay,Az,Gx,Gy,Gz;
 
 /* USER CODE END PD */
@@ -142,7 +142,6 @@ void cmd_vel_callback(const void * msgin)
 
    vl = (2 * v_mps - omega * L) / 2; // m/s
    vr = (2 * v_mps + omega * L) / 2; // m/s
-  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 }
 
 double cnt_pub = 0, cnt_imu = 0, cnt_control = 0;
@@ -893,12 +892,12 @@ void Task_IMU(void *argument)
   /* Infinite loop */
   while(1) {
 	  	now = xTaskGetTickCount();
-	  	dt = (now - last_tick) / 1000.0f;
+	  	dt = (now - last_tick) / (float) configTICK_RATE_HZ;
+		last_tick = now;
 	    cnt_imu++;
 		MPU6050_Read_Accel(&Ax,&Ay,&Az);
 		MPU6050_Read_Gyro(&Gx,&Gy,&Gz);
 		filter(&Ax,&Ay,&Az,&Gx,&Gy,&Gz,&pitch,&roll,&yaw, dt);
-		last_tick = now;
 	    vTaskDelay(pdMS_TO_TICKS(1));
   }
   /* USER CODE END Task_IMU */
@@ -932,8 +931,7 @@ void Task_control(void *argument)
   while(1) {
 		cnt_control++;
 		Drive_VW(&Left_motor, &Right_motor, v_mps, omega);
-//		 Motor_SetTarget(&Left_motor,200);
-//		 Motor_SetTarget(&Right_motor,200);
+
 		vTaskDelay(pdMS_TO_TICKS(1));
   }
   /* USER CODE END Task_control */
