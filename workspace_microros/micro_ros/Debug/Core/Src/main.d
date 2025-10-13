@@ -253,7 +253,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/geometry_msgs/msg/detail/transform_stamped__type_support.h \
  /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/Motor.h \
  /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/pid.h \
- /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/mpu.h \
+ /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/mpu6050.h \
  /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/pid.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
@@ -510,5 +510,5 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/geometry_msgs/msg/detail/transform_stamped__type_support.h:
 /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/Motor.h:
 /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/pid.h:
-/home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/mpu.h:
+/home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/mpu6050.h:
 /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/pid.h:

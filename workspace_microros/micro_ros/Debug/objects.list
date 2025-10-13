@@ -39,5 +39,5 @@
 "./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.o"
 "./Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.o"
 "./mylib/Motor.o"
-"./mylib/mpu.o"
+"./mylib/mpu6050.o"
 "./mylib/pid.o"

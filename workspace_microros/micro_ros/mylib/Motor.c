@@ -126,7 +126,6 @@ void Motor_SetTarget(Motor*motor, double target)
 
 void Drive_VW(Motor *mL, Motor *mR, float v_mps, float w_radps)
 {
-    const float half_track = TRACK_WIDTH_M * 0.5f;
     const float two_pi_R   = 2.0f * 3.1415926f * WHEEL_RADIUS_M;
 
      vL = (2 * v_mps - w_radps * TRACK_WIDTH_M) / (2) ;   // [m/s]

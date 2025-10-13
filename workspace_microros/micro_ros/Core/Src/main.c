@@ -38,7 +38,7 @@
 #include <geometry_msgs/msg/transform_stamped.h>
 
 #include <Motor.h>
-#include <mpu.h>
+#include <mpu6050.h>
 #include <pid.h>
 /* USER CODE END Includes */
 
@@ -95,7 +95,7 @@ const osThreadAttr_t myTask03_attributes = {
   .priority = (osPriority_t) osPriorityNormal2,
 };
 /* USER CODE BEGIN PV */
-
+MPU6050_t MPU6050;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -103,12 +103,12 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
-static void MX_I2C1_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_I2C1_Init(void);
 void Task_pub_sub(void *argument);
 void Task_IMU(void *argument);
 void Task_control(void *argument);
@@ -144,7 +144,7 @@ void cmd_vel_callback(const void * msgin)
    vr = (2 * v_mps + omega * L) / 2; // m/s
 }
 
-double cnt_pub = 0, cnt_imu = 0, cnt_control = 0;
+int cnt_pub = 0, cnt_imu = 0, cnt_control = 0;
 /* USER CODE END 0 */
 
 /**
@@ -178,15 +178,15 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART2_UART_Init();
-  MX_I2C1_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USART1_UART_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  MPU6050_init();
-
+   while(MPU6050_Init() == 1);
+   MPU6050_CalibGz(&MPU6050,1000);
 	HAL_TIM_Base_Start_IT(&htim1);
 	HAL_TIM_Encoder_Start_IT(&htim2, TIM_CHANNEL_ALL); //LEFT
 	HAL_TIM_Encoder_Start_IT(&htim4, TIM_CHANNEL_ALL); //RIGHT
@@ -199,8 +199,9 @@ int main(void)
 
 	// --- Base timer for control loop (interrupt) ---
     // Khoi tao 2 banh xe
-	Motor_Init(&Left_motor, LEFT,GPIOB, GPIO_PIN_12, GPIOB, GPIO_PIN_13,&htim3, TIM_CHANNEL_1, &htim2, 10, 1.2, 0.03);
-	Motor_Init(&Right_motor,RIGHT,GPIOB, GPIO_PIN_14, GPIOB, GPIO_PIN_15,&htim3, TIM_CHANNEL_2, &htim4	, 10, 1.2, 0.03);
+    //10 1.2 0.03
+	Motor_Init(&Left_motor, LEFT,GPIOB, GPIO_PIN_12, GPIOB, GPIO_PIN_13,&htim3, TIM_CHANNEL_1, &htim2, 350, 0, 0);
+	Motor_Init(&Right_motor,RIGHT,GPIOB, GPIO_PIN_14, GPIOB, GPIO_PIN_15,&htim3, TIM_CHANNEL_2, &htim4	, 300, 0, 0);
 
    // Khoi tao PID
 	PID(&LPID, &(pLeft->cur_speed),&(pLeft->Pid_output),&(pLeft->target_speed),pLeft->kp, pLeft->ki, pLeft->kd,_PID_P_ON_E, _PID_CD_DIRECT);
@@ -660,11 +661,27 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PB10 */
+  GPIO_InitStruct.Pin = GPIO_PIN_10;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF4_I2C2;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PB12 PB13 PB14 PB15 */
   GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB3 */
+  GPIO_InitStruct.Pin = GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF9_I2C2;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
@@ -699,6 +716,10 @@ double v_yaw = 0;
 geometry_msgs__msg__Quaternion euler_to_quaternion(double roll, double pitch, double yaw) {
     geometry_msgs__msg__Quaternion q;
 
+    yaw = yaw / RAD_TO_DEG;
+    roll = roll / RAD_TO_DEG;
+    pitch = pitch / RAD_TO_DEG;
+
     double cy = cos(yaw * 0.5);
     double sy = sin(yaw * 0.5);
     double cp = cos(pitch * 0.5);
@@ -719,13 +740,14 @@ typedef struct Velocity {
     double v_yaw;   // rad/s
 } Velocity;
 
-double vl_cur_mps, vr_cur_mps;
+double vl_cur_mps = 0, vr_cur_mps = 0;
 // Differential Drive Kinematic Model
 Velocity convertVrVlYaw(double vl_cur, double vr_cur, double yaw, double L) {
     Velocity vel;
     vl_cur_mps = vl_cur * ((2.0f * 3.1415926f * WHEEL_RADIUS_M)) / 60;   // rpm -> mps
     vr_cur_mps = vr_cur * ((2.0f * 3.1415926f * WHEEL_RADIUS_M)) / 60;   // rpm -> mps
 
+    yaw = yaw / RAD_TO_DEG; // yaw (rad)
     double v = (vl_cur_mps + vr_cur_mps) / 2.0;   // mps
     vel.vx = v * cos(yaw);
     vel.vy = v * sin(yaw);
@@ -734,6 +756,7 @@ Velocity convertVrVlYaw(double vl_cur, double vr_cur, double yaw, double L) {
     return vel;
 }
 double vr_cur, vl_cur;
+double roll, pitch, yaw;
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 {
 	if (timer != NULL) {
@@ -743,6 +766,9 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         odom_msg.header.stamp.sec     = time_ns / 1000000000ULL;
         odom_msg.header.stamp.nanosec = time_ns % 1000000000ULL;
 
+        roll = MPU6050.KalmanAngleX;
+        pitch = MPU6050.KalmanAngleY;
+        yaw = MPU6050.Yaw;
         geometry_msgs__msg__Quaternion q = euler_to_quaternion(0, 0, yaw);
 
 
@@ -758,7 +784,7 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         odom_msg.pose.pose.position.x = x_pos;
         odom_msg.pose.pose.position.y = y_pos;
         odom_msg.pose.pose.position.z = z_pos;
-        odom_msg.pose.pose.orientation = q;
+        odom_msg.pose.pose.orientation =	 q;
 
         odom_msg.twist.twist.linear.x = vel.vx;
         odom_msg.twist.twist.linear.y = vel.vy;
@@ -861,7 +887,7 @@ void Task_pub_sub(void *argument)
 	// add time for executor
 	rclc_executor_add_timer(&executor, &timer);
 
-    if (rmw_uros_sync_session(10) != RMW_RET_OK) {
+    if (rmw_uros_sync_session(1) != RMW_RET_OK) {
         printf("Time sync failed\n");
     }
 
@@ -874,6 +900,7 @@ void Task_pub_sub(void *argument)
 	while(1) {
 		cnt_pub++;
 		rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
+		vTaskDelay(pdMS_TO_TICKS(5));
 	}
   /* USER CODE END 5 */
 }
@@ -884,21 +911,15 @@ void Task_pub_sub(void *argument)
 * @param argument: Not used
 * @retval None
 */
-uint32_t now, last_tick;
 /* USER CODE END Header_Task_IMU */
 void Task_IMU(void *argument)
 {
   /* USER CODE BEGIN Task_IMU */
   /* Infinite loop */
   while(1) {
-	  	now = xTaskGetTickCount();
-	  	dt = (now - last_tick) / (float) configTICK_RATE_HZ;
-		last_tick = now;
-	    cnt_imu++;
-		MPU6050_Read_Accel(&Ax,&Ay,&Az);
-		MPU6050_Read_Gyro(&Gx,&Gy,&Gz);
-		filter(&Ax,&Ay,&Az,&Gx,&Gy,&Gz,&pitch,&roll,&yaw, dt);
-	    vTaskDelay(pdMS_TO_TICKS(1));
+	  MPU6050_Read_All(&MPU6050);
+	  cnt_imu++;
+//	  vTaskDelay(pdMS_TO_TICKS(1));
   }
   /* USER CODE END Task_IMU */
 }
