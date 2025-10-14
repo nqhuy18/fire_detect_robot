@@ -1,3 +1,6 @@
+#ifndef __MPU6050_H__
+#define __MPU6050_H__
+
 /*
  * mpu6050.h
  *
@@ -52,7 +55,7 @@ typedef struct
     double P[2][2];
 } Kalman_t;
 
-uint8_t MPU6050_Init(void);
+void MPU6050_Init(void);
 
 void MPU6050_Read_Accel(MPU6050_t *DataStruct);
 
@@ -64,3 +67,5 @@ void MPU6050_Read_All(MPU6050_t *DataStruct);
 
 double Kalman_getAngle(Kalman_t *Kalman, double newAngle, double newRate, double dt);
 void MPU6050_CalibGz(MPU6050_t *DataStruct, uint16_t samples);
+void I2C_HardReset(I2C_HandleTypeDef *hi2c);
+#endif

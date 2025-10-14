@@ -33,8 +33,9 @@
 
 #include <math.h>
 #include "mpu6050.h"
-
-
+#include "stm32f4xx_hal_gpio.h"
+#include <i2c.h>
+extern void MX_I2C1_Init(void);
 
 #define WHO_AM_I_REG 0x75
 #define PWR_MGMT_1_REG 0x6B
@@ -64,11 +65,9 @@ Kalman_t KalmanY = {
     .R_measure = 0.03f,
 };
 uint8_t check;
-uint8_t MPU6050_Init(void)
+void MPU6050_Init(void)
 {
-	HAL_Delay(200);
     uint8_t Data;
-
     HAL_I2C_Mem_Read(&hi2c1, MPU6050_ADDR, WHO_AM_I_REG, 1, &check, 1, i2c_timeout);
 
     if (check == 104) // 0x68 will be returned by the sensor if everything goes well
@@ -84,9 +83,29 @@ uint8_t MPU6050_Init(void)
 
         Data = 0x00;
         HAL_I2C_Mem_Write(&hi2c1, MPU6050_ADDR, GYRO_CONFIG_REG, 1, &Data, 1, i2c_timeout);
-        return 0;
     }
-    return 1;
+    else {
+    	GPIO_InitTypeDef GPIO_InitStruct = {0};
+        HAL_I2C_DeInit(&hi2c1);
+
+    	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+    	GPIO_InitStruct.Pin = GPIO_PIN_8;
+    	GPIO_InitStruct.Pull = GPIO_NOPULL;
+    	GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+    	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
+
+    	for (int i = 0; i < 10; i++) {
+    		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
+    		HAL_Delay(20);
+    		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
+    		HAL_Delay(20);
+    	}
+    		MX_I2C1_Init();
+    		MPU6050_Init();
+    }
+
 }
 
 void MPU6050_Read_Accel(MPU6050_t *DataStruct)
