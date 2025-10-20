@@ -9961,26 +9961,27 @@ LOAD /opt/st/stm32cubeide_1.19.0/plugins/com.st.stm32cube.ide.mcu.externaltools.
  .text.HAL_I2C_MspDeInit
                 0x08001b18       0x48 ./Core/Src/i2c.o
                 0x08001b18                HAL_I2C_MspDeInit
- .text.main     0x08001b60      0x23c ./Core/Src/main.o
+ .text.main     0x08001b60      0x238 ./Core/Src/main.o
                 0x08001b60                main
  .text.SystemClock_Config
-                0x08001d9c       0xd0 ./Core/Src/main.o
-                0x08001d9c                SystemClock_Config
+                0x08001d98       0xd0 ./Core/Src/main.o
+                0x08001d98                SystemClock_Config
  .text.Error_Handler
-                0x08001e6c        0xc ./Core/Src/main.o
-                0x08001e6c                Error_Handler
+                0x08001e68        0xc ./Core/Src/main.o
+                0x08001e68                Error_Handler
  .text.microros_allocate
-                0x08001e78       0x44 ./Core/Src/microros_allocators.o
-                0x08001e78                microros_allocate
+                0x08001e74       0x44 ./Core/Src/microros_allocators.o
+                0x08001e74                microros_allocate
  .text.microros_deallocate
-                0x08001ebc       0x38 ./Core/Src/microros_allocators.o
-                0x08001ebc                microros_deallocate
+                0x08001eb8       0x38 ./Core/Src/microros_allocators.o
+                0x08001eb8                microros_deallocate
  .text.microros_reallocate
-                0x08001ef4       0x6c ./Core/Src/microros_allocators.o
-                0x08001ef4                microros_reallocate
+                0x08001ef0       0x6c ./Core/Src/microros_allocators.o
+                0x08001ef0                microros_reallocate
  .text.microros_zero_allocate
-                0x08001f60       0x50 ./Core/Src/microros_allocators.o
-                0x08001f60                microros_zero_allocate
+                0x08001f5c       0x50 ./Core/Src/microros_allocators.o
+                0x08001f5c                microros_zero_allocate
+ *fill*         0x08001fac        0x4 
  .text.UTILS_NanosecondsToTimespec
                 0x08001fb0       0xa0 ./Core/Src/microros_time.o
                 0x08001fb0                UTILS_NanosecondsToTimespec

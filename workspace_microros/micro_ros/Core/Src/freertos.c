@@ -218,7 +218,7 @@ void Task_pub_sub(void *argument)
 	while(1) {
 		cnt_pub++;
 		rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
-		vTaskDelay(pdMS_TO_TICKS(5));
+		vTaskDelay(pdMS_TO_TICKS(1));
 	}
   /* USER CODE END 5 */
 }
@@ -279,4 +279,3 @@ void Task_control(void *argument)
 /* USER CODE BEGIN Application */
 
 /* USER CODE END Application */
-
