@@ -234,7 +234,7 @@ void MPU6050_Read_All(MPU6050_t *DataStruct)
         DataStruct->Gx = -DataStruct->Gx;
     DataStruct->KalmanAngleX = Kalman_getAngle(&KalmanX, roll, DataStruct->Gx, dt);
 
-    DataStruct->Yaw += (DataStruct->Gz - DataStruct->Gz_bias) * dt;
+    DataStruct->Yaw += (-(DataStruct->Gz - DataStruct->Gz_bias)) * dt;
 }
 
 double Kalman_getAngle(Kalman_t *Kalman, double newAngle, double newRate, double dt)

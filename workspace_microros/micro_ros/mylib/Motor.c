@@ -7,7 +7,8 @@
 	uint16_t count = 0;
 	uint32_t prevtime = 0;
 	float vL, vR;
-
+#define OFFSET 0.15f
+extern double vl_cur_mps, vr_cur_mps;
 	// Init Motor
 	void Motor_Init(Motor *_motor,
 						Motor_id id,
@@ -79,6 +80,10 @@ void Motor_SetPwm(Motor *motor)
 		}
 	if(motor->id == RIGHT)
 		{
+		if (motor->target_speed == 0 && fabs(vr_cur_mps) < OFFSET)
+		{
+			motor->Pid_output = 0;
+		}
 			if(motor->Pid_output > 0)
 			{
 				HAL_GPIO_WritePin(motor->IN1_Port, motor->IN1_Pin, GPIO_PIN_SET);
@@ -98,6 +103,14 @@ void Motor_SetPwm(Motor *motor)
 			}
 		else if (motor->id == LEFT)
 		{
+			if (motor->target_speed == 0  && fabs(vl_cur_mps) < OFFSET)
+			{
+				motor->Pid_output = 0;
+			}
+			if (motor->target_speed == 0 )
+			{
+				motor->Pid_output = 0;
+			}
 			if(motor->Pid_output > 0)
 			{
 				HAL_GPIO_WritePin(motor->IN1_Port, motor->IN1_Pin,GPIO_PIN_RESET);
