@@ -7,7 +7,7 @@
 	uint16_t count = 0;
 	uint32_t prevtime = 0;
 	float vL, vR;
-#define OFFSET 0.15f
+#define OFFSET 0.09f
 extern double vl_cur_mps, vr_cur_mps;
 	// Init Motor
 	void Motor_Init(Motor *_motor,

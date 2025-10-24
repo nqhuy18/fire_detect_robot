@@ -164,6 +164,7 @@ void Task_pub_sub(void *argument)
 	 // create init_options
 	 rclc_support_init(&support, 0, NULL, &allocator);
 
+
 	 //create node_sub
 	 rclc_node_init_default(&node, "stm32_node","", &support);
 
@@ -189,16 +190,18 @@ void Task_pub_sub(void *argument)
 	    "/tf");
 	// create timer
 	rcl_timer_t timer;
-	const unsigned int timer_timeout = 1000;
-	RCCHECK(rclc_timer_init_default(
+	const unsigned int timer_timeout = 50;
+	RCCHECK(rclc_timer_init_default2(
 		&timer,
 		&support,
 		RCL_MS_TO_NS(timer_timeout),
-		timer_callback));
+		timer_callback,
+		true));
 
 	// create executor
 	rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
 	rclc_executor_init(&executor, &support.context, 2, &allocator);
+
 
 	// add subscriber callback to the executor
 	rclc_executor_add_subscription(&executor, &subscriber, &msg_cmd_vel, &cmd_vel_callback, ON_NEW_DATA);
@@ -208,16 +211,19 @@ void Task_pub_sub(void *argument)
     if (rmw_uros_sync_session(1) != RMW_RET_OK) {
         printf("Time sync failed\n");
     }
-
     // init data odom
     odom_msg.header.frame_id.data = "odom";
     odom_msg.child_frame_id.data  = "base_link";
 
     tf.header.frame_id.data = "odom";
     tf.child_frame_id.data = "base_link";
+    int counter = 0;
 	while(1) {
 		cnt_pub++;
-		rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
+		if (++counter % 100 == 0) {
+		    rmw_uros_sync_session(100);
+		}
+		rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
 		vTaskDelay(pdMS_TO_TICKS(1));
 	}
   /* USER CODE END 5 */
