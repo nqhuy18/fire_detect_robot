@@ -84,6 +84,7 @@ void MPU6050_Init(void)
         Data = 0x00;
         HAL_I2C_Mem_Write(&hi2c1, MPU6050_ADDR, GYRO_CONFIG_REG, 1, &Data, 1, i2c_timeout);
     }
+
     else {
     	GPIO_InitTypeDef GPIO_InitStruct = {0};
         HAL_I2C_DeInit(&hi2c1);

@@ -1,5 +1,6 @@
 #include "Motor.h"
 #include <math.h>
+#include<mpu6050.h>
 
 	double encoder_progress = 0;
 	double encoder_output = 0;
@@ -68,7 +69,7 @@ void Motor_GetSpeed(Motor *_motor)
 	}
 	
 	
-void Motor_SetPwm(Motor *motor)
+void Motor_SetPwm(Motor *motor  , MPU6050_t *DataStruct)
 	{
 		if(motor->Pid_output > 999)
 		{
@@ -99,7 +100,7 @@ void Motor_SetPwm(Motor *motor)
 				HAL_GPIO_WritePin(motor->IN1_Port, motor->IN1_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(motor->IN2_Port, motor->IN2_Pin, GPIO_PIN_RESET);
 			}
-			motor->htim_pwm->Instance->CCR2 =(uint32_t)((fabs)(motor->Pid_output) );
+			motor->htim_pwm->Instance->CCR2 =(uint32_t)((fabs)(motor->Pid_output) + (fabs)(DataStruct->OutputYaw));
 			}
 		else if (motor->id == LEFT)
 		{
@@ -126,10 +127,9 @@ void Motor_SetPwm(Motor *motor)
 				HAL_GPIO_WritePin(motor->IN1_Port, motor->IN1_Pin, GPIO_PIN_RESET);
 				HAL_GPIO_WritePin(motor->IN2_Port, motor->IN2_Pin, GPIO_PIN_RESET);
 			}
-			motor->htim_pwm->Instance->CCR1 =(uint32_t)((fabs)(motor->Pid_output) );
+			motor->htim_pwm->Instance->CCR1 =(uint32_t)((fabs)(motor->Pid_output)-(fabs)(DataStruct->OutputYaw));
 
 		}
-
 
 	}
 void Motor_SetTarget(Motor*motor, double target)

@@ -5,7 +5,7 @@
 
 	#include "stdbool.h"
 	#include "pid.h"
-
+#include "mpu6050.h"
 #define MOTOR_RPS_MAX    (330.0f/60.0f) /* ~5.5 rps n?u motor ~330rpm */
 
 
@@ -16,7 +16,7 @@
 #define WHEEL_RADIUS_M   0.034f
 
 
-#define TRACK_WIDTH_M    0.30f
+#define TRACK_WIDTH_M    0.28f
 extern float vL, vR;
 
 
@@ -111,7 +111,7 @@ extern float vL, vR;
 
 	void Motor_SetDir(Motor *motor);
 	void PWM_limit(Motor *motor);
-	void Motor_SetPwm(Motor *motor);
+	void Motor_SetPwm(Motor *motor, MPU6050_t *DataStruct);
 	void Motor_stop(Motor *motor);
 	void Motor_SetTarget(Motor*motor, double target);
 

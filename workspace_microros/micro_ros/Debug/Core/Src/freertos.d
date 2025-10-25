@@ -255,6 +255,7 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/Motor.h \
  /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/pid.h \
  /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/mpu6050.h \
+ /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/mpu6050.h \
  /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/pid.h \
  ../Core/Inc/usart.h ../Core/Inc/main.h
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
@@ -513,6 +514,7 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/geometry_msgs/msg/detail/transform_stamped__type_support.h:
 /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/Motor.h:
 /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/pid.h:
+/home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/mpu6050.h:
 /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/mpu6050.h:
 /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/pid.h:
 ../Core/Inc/usart.h:

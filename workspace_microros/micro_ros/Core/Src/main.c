@@ -70,6 +70,7 @@ Motor Right_motor;
 Motor *pRight = &Right_motor;
 PID_TypeDef RPID;
 PID_TypeDef LPID;
+PID_TypeDef YPID;
 /* USER CODE END 0 */
 
 /**
@@ -126,8 +127,8 @@ int main(void)
 	// --- Base timer for control loop (interrupt) ---
     // Khoi tao 2 banh xe
     //10 1.2 0.03
-  Motor_Init(&Left_motor, LEFT,GPIOB, GPIO_PIN_12, GPIOB, GPIO_PIN_13,&htim3, TIM_CHANNEL_1, &htim2, 80, 3, 0.01);
-  Motor_Init(&Right_motor,RIGHT,GPIOB, GPIO_PIN_14, GPIOB, GPIO_PIN_15,&htim3, TIM_CHANNEL_2, &htim4	, 80, 3, 0.01);
+  Motor_Init(&Left_motor, LEFT,GPIOB, GPIO_PIN_12, GPIOB, GPIO_PIN_13,&htim3, TIM_CHANNEL_1, &htim2, 80, 3, 0);
+  Motor_Init(&Right_motor,RIGHT,GPIOB, GPIO_PIN_14, GPIOB, GPIO_PIN_15,&htim3, TIM_CHANNEL_2, &htim4	, 85, 3, 0);
 
    // Khoi tao PID
   PID(&LPID, &(pLeft->cur_speed),&(pLeft->Pid_output),&(pLeft->target_speed),pLeft->kp, pLeft->ki, pLeft->kd,_PID_P_ON_E, _PID_CD_DIRECT);
@@ -139,6 +140,13 @@ int main(void)
   PID_SetMode(&RPID, _PID_MODE_AUTOMATIC);
   PID_SetSampleTime(&RPID, 10);
   PID_SetOutputLimits(&RPID, -999, 999);
+
+
+  MPU6050.TargetYaw = 0;
+  PID(&YPID, &(MPU6050.Yaw), &(MPU6050.OutputYaw) , &(MPU6050.TargetYaw), 5 , 0.5 , 0 ,_PID_P_ON_E, _PID_CD_DIRECT);
+  PID_SetMode(&RPID, _PID_MODE_AUTOMATIC);
+  PID_SetSampleTime(&RPID, 10);
+  PID_SetOutputLimits(&RPID, -90, 90);
 
   /* USER CODE END 2 */
 

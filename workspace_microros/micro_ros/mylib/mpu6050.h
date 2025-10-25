@@ -42,6 +42,8 @@ typedef struct
     double KalmanAngleX;
     double KalmanAngleY;
     double Yaw;
+    double TargetYaw;
+    double OutputYaw;
 } MPU6050_t;
 
 // Kalman structure

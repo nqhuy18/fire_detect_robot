@@ -1,5 +1,5 @@
 ../Core/Src/freertos.c:89:6:MX_FREERTOS_Init	1
 ../Core/Src/freertos.c:137:6:Task_pub_sub	5
 ../Core/Src/freertos.c:239:6:Task_IMU	1
-../Core/Src/freertos.c:256:6:HAL_TIM_PeriodElapsedCallback	2
-../Core/Src/freertos.c:271:6:Task_control	1
+../Core/Src/freertos.c:257:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/freertos.c:294:6:Task_control	1
