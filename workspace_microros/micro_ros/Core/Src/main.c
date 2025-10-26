@@ -160,19 +160,19 @@ int main(void)
 
 	// --- Base timer for control loop (interrupt) ---
     // Khoi tao 2 banh xe
-    //10 1.2 0.03
-  Motor_Init(&Left_motor, LEFT,GPIOB, GPIO_PIN_12, GPIOB, GPIO_PIN_13,&htim3, TIM_CHANNEL_1, &htim2, 80, 3, 0);
-  Motor_Init(&Right_motor,RIGHT,GPIOB, GPIO_PIN_14, GPIOB, GPIO_PIN_15,&htim3, TIM_CHANNEL_2, &htim4	, 80, 3, 0);
+    //80 3 0
+  Motor_Init(&Left_motor, LEFT,GPIOB, GPIO_PIN_12, GPIOB, GPIO_PIN_13,&htim3, TIM_CHANNEL_1, &htim2, 100, 0.5, 0);
+  Motor_Init(&Right_motor,RIGHT,GPIOB, GPIO_PIN_14, GPIOB, GPIO_PIN_15,&htim3, TIM_CHANNEL_2, &htim4, 100, 0.5, 0);
 
    // Khoi tao PID
   PID(&LPID, &(pLeft->cur_speed),&(pLeft->Pid_output),&(pLeft->target_speed),pLeft->kp, pLeft->ki, pLeft->kd,_PID_P_ON_E, _PID_CD_DIRECT);
   PID_SetMode(&LPID, _PID_MODE_AUTOMATIC);
-  PID_SetSampleTime(&LPID, 10);
+  PID_SetSampleTime(&LPID, 1);
   PID_SetOutputLimits(&LPID, -999, 999);
 
   PID(&RPID,&(pRight->cur_speed),&(pRight->Pid_output), &(pRight->target_speed),pRight->kp, pRight->ki, pRight->kd,_PID_P_ON_E, _PID_CD_DIRECT);
   PID_SetMode(&RPID, _PID_MODE_AUTOMATIC);
-  PID_SetSampleTime(&RPID, 10);
+  PID_SetSampleTime(&RPID, 1);
   PID_SetOutputLimits(&RPID, -999, 999);
 
   /* USER CODE END 2 */

@@ -1,0 +1,17 @@
+# Ignore build directories (CubeIDE generates Debug/ and Release/)
+workspace_microros/micro_ros/Debug/
+workspace_microros/micro_ros/Release/
+
+# Ignore typical build artifacts
+*.o
+*.elf
+*.map
+*.list
+*.su
+*.cyclo
+*.d
+
+# Keep source code and project files
+!/workspace_microros/micro_ros/
+!/simulate_Gazebo/
+

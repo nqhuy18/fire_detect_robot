@@ -36,7 +36,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+extern double vr_cur, vl_cur;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -218,7 +218,7 @@ void Task_pub_sub(void *argument)
 	while(1) {
 		cnt_pub++;
 		rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
-		vTaskDelay(pdMS_TO_TICKS(1));
+		vTaskDelay(pdMS_TO_TICKS(100));
 	}
   /* USER CODE END 5 */
 }
@@ -237,11 +237,11 @@ void Task_IMU(void *argument)
   while(1) {
 	  MPU6050_Read_All(&MPU6050);
 	  cnt_imu++;
-	  vTaskDelay(pdMS_TO_TICKS(1));
+	  vTaskDelay(pdMS_TO_TICKS(10));
   }
   /* USER CODE END Task_IMU */
 }
-/* USER CODE BEGIN Header_Task_control */
+///* USER CODE BEGIN Header_Task_control */
 /**
 * @brief Function implementing the myTask03 thread.
 * @param argument: Not used
@@ -262,17 +262,64 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
    }
 }
 /* USER CODE END Header_Task_control */
+//double distance = 0;
+//#define target_distance 1.2
+//void Task_control(void *argument)
+//{
+//  /* USER CODE BEGIN Task_control */
+//  /* Infinite loop */
+// uint64_t last_time = rmw_uros_epoch_nanos();
+//  while(1) {
+//        uint64_t time_ns = rmw_uros_epoch_nanos();
+//	  	double v_cur = (vl_cur + vr_cur) / 2;
+//	  	v_cur = v_cur * ((2.0f * 3.1415926f * WHEEL_RADIUS_M)) / 60; // m/s
+//        double dt = (time_ns - last_time) / 1e9;
+//        last_time = time_ns;
+//        distance += v_cur * dt;
+//        if (distance > target_distance) {
+//        	 Drive_VW(&Left_motor, &Right_motor, 0, 0);
+//        }
+//		else {
+//			Drive_VW(&Left_motor, &Right_motor, v_mps, omega);
+//		}
+//		cnt_control++;
+//		vTaskDelay(pdMS_TO_TICKS(1));
+//  }
+//  /* USER CODE END Task_control */
+//}
+
+//Test speed
+//TickType_t elapsed;
+//void Task_control(void *argument)
+//{
+//    TickType_t start_tick = xTaskGetTickCount();
+//    const TickType_t run_ticks = pdMS_TO_TICKS(5000);  // 5s
+//
+//    while (1)
+//    {
+//        elapsed = xTaskGetTickCount() - start_tick;
+//
+//        if (elapsed < run_ticks)
+//        {
+//            Drive_VW(&Left_motor, &Right_motor, v_mps, omega);
+//        }
+//        else
+//        {
+//            Drive_VW(&Left_motor, &Right_motor, 0, 0);
+//        }
+//    	cnt_control++;
+//        vTaskDelay(pdMS_TO_TICKS(1));  // mỗi 100ms in 1 lần
+//    }
+//}
 void Task_control(void *argument)
 {
-  /* USER CODE BEGIN Task_control */
-  /* Infinite loop */
-  while(1) {
-		cnt_control++;
-		Drive_VW(&Left_motor, &Right_motor, v_mps, omega);
 
-		vTaskDelay(pdMS_TO_TICKS(1));
-  }
-  /* USER CODE END Task_control */
+    while (1)
+    {
+    	cnt_control++;
+        Drive_VW(&Left_motor, &Right_motor, v_mps, omega);
+        vTaskDelay(pdMS_TO_TICKS(1));  // mỗi 100ms in 1 lần
+    }
 }
 
 /* Private application code --------------------------------------------------*/

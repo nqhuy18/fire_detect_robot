@@ -62,7 +62,7 @@ void Motor_GetSpeed(Motor *_motor)
 		_motor->encoder_count = __HAL_TIM_GET_COUNTER(_motor->htim_encoder);
 		_motor->delta_count = _motor->encoder_count - _motor->prev_count;
     int sign = (_motor->id == LEFT) ? 1 : -1;
-		_motor->cur_speed = (sign)*( (double)(_motor->delta_count)/ ENCODER_PPR) * (60.0 / (10 / 1000.0));
+		_motor->cur_speed = (sign)*( (double)(_motor->delta_count)/ ENCODER_PPR) * (60.0 / (1 / 1000.0));
 		_motor->prev_count = _motor->encoder_count;
 
 	}
@@ -80,7 +80,7 @@ void Motor_SetPwm(Motor *motor)
 		}
 	if(motor->id == RIGHT)
 		{
-		if (motor->target_speed == 0 && fabs(vr_cur_mps) < OFFSET)
+		if (motor->target_speed == 0 && fabs(vr_cur_mps) < OFFSET +0.05)
 		{
 			motor->Pid_output = 0;
 		}
