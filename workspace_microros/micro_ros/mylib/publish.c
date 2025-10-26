@@ -15,11 +15,13 @@ double vl, vr;
 MPU6050_t MPU6050;
 rcl_publisher_t odom_pub;
 rcl_publisher_t tf_pub;
+rcl_publisher_t imu_pub;
 rcl_subscription_t subscriber;
 rcl_allocator_t allocator;
 rclc_support_t support;
 rcl_node_t node;
 nav_msgs__msg__Odometry odom_msg;
+sensor_msgs__msg__Imu imu_msg;
 geometry_msgs__msg__TransformStamped tf;
 tf2_msgs__msg__TFMessage tf_msg;
 geometry_msgs__msg__Twist msg_cmd_vel;
@@ -62,13 +64,18 @@ Velocity convertVrVlYaw(double vl_cur, double vr_cur, double yaw, double L) {
 
     return vel;
 }
-
+double dt;
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 {
 	if (timer != NULL) {
 		//Get time actual from agent ros to mcu
 		static uint64_t last_time_ns = 0;
+
         uint64_t time_ns = rmw_uros_epoch_nanos();
+        if (last_time_ns == 0) {
+                    last_time_ns = time_ns;
+                    return; // Bỏ qua lần tích phân đầu tiên
+        }
         odom_msg.header.stamp.sec     = time_ns / 1000000000ULL;
         odom_msg.header.stamp.nanosec = time_ns % 1000000000ULL;
 
@@ -81,7 +88,7 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         Velocity vel = convertVrVlYaw(vr_cur, vl_cur, yaw, TRACK_WIDTH_M); // vr_cur: rpm
         // update data /odom
 
-        double dt = (time_ns - last_time_ns) / 1e9;
+        dt = (time_ns - last_time_ns) / 1e9;
         last_time_ns = time_ns;
 
         x_pos = x_pos + vel.vx * dt;
@@ -96,21 +103,56 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         odom_msg.twist.twist.linear.y = 0.00;
         odom_msg.twist.twist.angular.z = vel.v_yaw;
 
+        imu_msg.header.stamp.sec = time_ns / 1000000000ULL;
+        imu_msg.header.stamp.nanosec = time_ns % 1000000000ULL;
+        imu_msg.header.frame_id.data = "base_link";
 
-        tf.header.stamp.sec = time_ns / 1000000000ULL;
-        tf.header.stamp.nanosec = time_ns % 1000000000ULL;
+        imu_msg.orientation = q;
 
-        tf.transform.translation.x = x_pos;
-        tf.transform.translation.y = y_pos;
-        tf.transform.translation.z = z_pos;
+        imu_msg.angular_velocity.x = MPU6050.Gx * DEG_TO_RAD;
+        imu_msg.angular_velocity.y = MPU6050.Gy * DEG_TO_RAD;
+        imu_msg.angular_velocity.z = MPU6050.Gz * DEG_TO_RAD;
 
-        tf.transform.rotation = q;
+        // --- Gia tốc tuyến tính (Accelerometer) ---
+        imu_msg.linear_acceleration.x = MPU6050.Ax * 9.80665;  // m/s²
+        imu_msg.linear_acceleration.y = MPU6050.Ay * 9.80665;
+        imu_msg.linear_acceleration.z = MPU6050.Az * 9.80665;
 
-        tf_msg.transforms.data = &tf;
-        tf_msg.transforms.size = 1;
-        tf_msg.transforms.capacity = 1;
+        for (int i = 0; i < 9; i++) {
+            imu_msg.orientation_covariance[i] = 0.0;
+            imu_msg.angular_velocity_covariance[i] = 0.0;
+            imu_msg.linear_acceleration_covariance[i] = 0.0;
+        }
+
+        imu_msg.orientation_covariance[0] = 0.01;
+        imu_msg.orientation_covariance[4] = 0.01;
+        imu_msg.orientation_covariance[8] = 0.01;
+
+        imu_msg.angular_velocity_covariance[0] = 0.001;
+        imu_msg.angular_velocity_covariance[4] = 0.001;
+        imu_msg.angular_velocity_covariance[8] = 0.001;
+
+        imu_msg.linear_acceleration_covariance[0] = 0.01;
+        imu_msg.linear_acceleration_covariance[4] = 0.01;
+        imu_msg.linear_acceleration_covariance[8] = 0.01;
+
+
+//        tf.header.stamp.sec = time_ns / 1000000000ULL;
+//        tf.header.stamp.nanosec = time_ns % 1000000000ULL;
+//
+//        tf.transform.translation.x = x_pos;
+//        tf.transform.translation.y = y_pos;
+//        tf.transform.translation.z = z_pos;
+//
+//        tf.transform.rotation = q;
+//
+//        tf_msg.transforms.data = &tf;
+//        tf_msg.transforms.size = 1;
+//        tf_msg.transforms.capacity = 1;
+
 		RCSOFTCHECK(rcl_publish(&odom_pub, &odom_msg, NULL));
-		RCSOFTCHECK(rcl_publish(&tf_pub, &tf_msg, NULL));
+//		RCSOFTCHECK(rcl_publish(&tf_pub, &tf_msg, NULL));
+		RCSOFTCHECK(rcl_publish(&imu_pub, &imu_msg, NULL));
 	}
 }
 

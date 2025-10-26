@@ -252,6 +252,11 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  ../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/geometry_msgs/msg/transform_stamped.h \
  ../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/geometry_msgs/msg/detail/transform_stamped__functions.h \
  ../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/geometry_msgs/msg/detail/transform_stamped__type_support.h \
+ ../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/sensor_msgs/msg/imu.h \
+ ../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/sensor_msgs/msg/detail/imu__struct.h \
+ ../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/sensor_msgs/msg/detail/imu__functions.h \
+ ../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/sensor_msgs/msg/rosidl_generator_c__visibility_control.h \
+ ../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/sensor_msgs/msg/detail/imu__type_support.h \
  /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/Motor.h \
  /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/pid.h \
  /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/mpu6050.h \
@@ -511,6 +516,11 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/geometry_msgs/msg/transform_stamped.h:
 ../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/geometry_msgs/msg/detail/transform_stamped__functions.h:
 ../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/geometry_msgs/msg/detail/transform_stamped__type_support.h:
+../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/sensor_msgs/msg/imu.h:
+../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/sensor_msgs/msg/detail/imu__struct.h:
+../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/sensor_msgs/msg/detail/imu__functions.h:
+../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/sensor_msgs/msg/rosidl_generator_c__visibility_control.h:
+../micro_ros_stm32cubemx_utils/microros_static_library_ide/libmicroros/include/sensor_msgs/msg/detail/imu__type_support.h:
 /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/Motor.h:
 /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/pid.h:
 /home/nqh/Fire_Alarm_Robot/workspace_microros/micro_ros/mylib/mpu6050.h:

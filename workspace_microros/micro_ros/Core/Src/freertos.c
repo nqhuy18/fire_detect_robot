@@ -172,8 +172,13 @@ void Task_pub_sub(void *argument)
 	    &odom_pub,
 	    &node,
 		ROSIDL_GET_MSG_TYPE_SUPPORT(nav_msgs, msg, Odometry),
-	    "/odom_data");
+	    "/odom/data");
 
+	 rclc_publisher_init_default(
+	     &imu_pub,
+	     &node,
+	     ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu),
+	     "/imu/data");
 
 	//create subscriber
 	rclc_subscription_init_default(
@@ -182,14 +187,14 @@ void Task_pub_sub(void *argument)
 		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
 		"/cmd_vel");
 
-	rclc_publisher_init_default(
-	    &tf_pub,
-	    &node,
-	    ROSIDL_GET_MSG_TYPE_SUPPORT(tf2_msgs, msg, TFMessage),
-	    "/tf");
+//	rclc_publisher_init_default(
+//	    &tf_pub,
+//	    &node,
+//	    ROSIDL_GET_MSG_TYPE_SUPPORT(tf2_msgs, msg, TFMessage),
+//	    "/tf");
 	// create timer
 	rcl_timer_t timer;
-	const unsigned int timer_timeout = 1000;
+	const unsigned int timer_timeout = 100;
 	RCCHECK(rclc_timer_init_default(
 		&timer,
 		&support,
@@ -198,14 +203,14 @@ void Task_pub_sub(void *argument)
 
 	// create executor
 	rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-	rclc_executor_init(&executor, &support.context, 2, &allocator);
+	rclc_executor_init(&executor, &support.context, 3, &allocator);
 
 	// add subscriber callback to the executor
 	rclc_executor_add_subscription(&executor, &subscriber, &msg_cmd_vel, &cmd_vel_callback, ON_NEW_DATA);
 	// add time for executor
 	rclc_executor_add_timer(&executor, &timer);
 
-    if (rmw_uros_sync_session(1) != RMW_RET_OK) {
+    if (rmw_uros_sync_session(100) != RMW_RET_OK) {
         printf("Time sync failed\n");
     }
 
@@ -213,12 +218,12 @@ void Task_pub_sub(void *argument)
     odom_msg.header.frame_id.data = "odom";
     odom_msg.child_frame_id.data  = "base_link";
 
-    tf.header.frame_id.data = "odom";
-    tf.child_frame_id.data = "base_link";
+//    tf.header.frame_id.data = "odom";
+//    tf.child_frame_id.data = "base_link";
 	while(1) {
 		cnt_pub++;
 		rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
-		vTaskDelay(pdMS_TO_TICKS(100));
+		vTaskDelay(pdMS_TO_TICKS(10));
 	}
   /* USER CODE END 5 */
 }

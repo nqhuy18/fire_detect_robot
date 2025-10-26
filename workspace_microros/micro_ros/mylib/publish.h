@@ -14,6 +14,7 @@
 #include <nav_msgs/msg/odometry.h>
 #include <tf2_msgs/msg/tf_message.h>
 #include <geometry_msgs/msg/transform_stamped.h>
+#include <sensor_msgs/msg/imu.h>
 
 #include <Motor.h>
 #include <mpu6050.h>
@@ -22,6 +23,7 @@
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){printf("Failed status on line %d: %d. Aborting.\n",__LINE__,(int)temp_rc); }}
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){printf("Failed status on line %d: %d. Continuing.\n",__LINE__,(int)temp_rc);}}
 
+#define DEG_TO_RAD 0.01745329252
 extern double x_pos, y_pos, z_pos;
 extern double vx, vy;
 extern double v_yaw;
@@ -42,13 +44,14 @@ typedef struct Velocity {
     double v_yaw;   // rad/s
 } Velocity;
 
-extern rcl_publisher_t odom_pub, tf_pub;
+extern rcl_publisher_t odom_pub, tf_pub, imu_pub;
 extern rcl_subscription_t subscriber;
 
 extern rclc_support_t support;
 extern rcl_allocator_t allocator;
 extern rcl_node_t node;
 extern nav_msgs__msg__Odometry odom_msg;
+extern sensor_msgs__msg__Imu imu_msg;
 extern geometry_msgs__msg__TransformStamped tf;
 extern tf2_msgs__msg__TFMessage tf_msg;
 extern geometry_msgs__msg__Twist msg_cmd_vel;
