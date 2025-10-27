@@ -28783,7 +28783,7 @@ void Motor_GetSpeed(Motor *_motor)
  800abfa:	e001      	b.n	800ac00 <Motor_GetSpeed+0x40>
  800abfc:	f04f 33ff 	mov.w	r3, #4294967295	@ 0xffffffff
  800ac00:	60fb      	str	r3, [r7, #12]
-		_motor->cur_speed = (sign)*( (double)(_motor->delta_count)/ ENCODER_PPR) * (60.0 / (1 / 1000.0));
+		_motor->cur_speed = (sign)*( (double)(_motor->delta_count)/ ENCODER_PPR) * (60.0 / (10 / 1000.0));
  800ac02:	68f8      	ldr	r0, [r7, #12]
  800ac04:	f7f5 fca6 	bl	8000554 <__aeabi_i2d>
  800ac08:	4604      	mov	r4, r0
@@ -28824,7 +28824,7 @@ void Motor_GetSpeed(Motor *_motor)
  800ac5a:	bdb0      	pop	{r4, r5, r7, pc}
  800ac5c:	f3af 8000 	nop.w
  800ac60:	00000000 	.word	0x00000000
- 800ac64:	40ed4c00 	.word	0x40ed4c00
+ 800ac64:	40b77000 	.word	0x40b77000
  800ac68:	4094a000 	.word	0x4094a000
  800ac6c:	00000000 	.word	0x00000000
 
