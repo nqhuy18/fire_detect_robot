@@ -2789,8 +2789,8 @@ void Task_control(void *argument)
  800191e:	4907      	ldr	r1, [pc, #28]	@ (800193c <Task_control+0x58>)
  8001920:	4807      	ldr	r0, [pc, #28]	@ (8001940 <Task_control+0x5c>)
  8001922:	f009 fb0f 	bl	800af44 <Drive_VW>
-        vTaskDelay(pdMS_TO_TICKS(1));  // mỗi 100ms in 1 lần
- 8001926:	2001      	movs	r0, #1
+        vTaskDelay(pdMS_TO_TICKS(10));  // mỗi 100ms in 1 lần
+ 8001926:	200a      	movs	r0, #10
  8001928:	f007 fbaa 	bl	8009080 <vTaskDelay>
     	cnt_control++;
  800192c:	bf00      	nop
@@ -3232,7 +3232,7 @@ int main(void)
 	// --- Base timer for control loop (interrupt) ---
     // Khoi tao 2 banh xe
     //80 3 0
-  Motor_Init(&Left_motor, LEFT,GPIOB, GPIO_PIN_12, GPIOB, GPIO_PIN_13,&htim3, TIM_CHANNEL_1, &htim2, 100, 0, 0);
+  Motor_Init(&Left_motor, LEFT,GPIOB, GPIO_PIN_12, GPIOB, GPIO_PIN_13,&htim3, TIM_CHANNEL_1, &htim2, 80, 3, 0);
  8001bc8:	4b63      	ldr	r3, [pc, #396]	@ (8001d58 <main+0x208>)
  8001bca:	9304      	str	r3, [sp, #16]
  8001bcc:	2300      	movs	r3, #0
@@ -3244,7 +3244,7 @@ int main(void)
  8001bda:	4b62      	ldr	r3, [pc, #392]	@ (8001d64 <main+0x214>)
  8001bdc:	9300      	str	r3, [sp, #0]
  8001bde:	ed9f 1a62 	vldr	s2, [pc, #392]	@ 8001d68 <main+0x218>
- 8001be2:	eddf 0a61 	vldr	s1, [pc, #388]	@ 8001d68 <main+0x218>
+ 8001be2:	eef0 0a08 	vmov.f32	s1, #8	@ 0x40400000  3.0
  8001be6:	ed9f 0a61 	vldr	s0, [pc, #388]	@ 8001d6c <main+0x21c>
  8001bea:	f44f 5380 	mov.w	r3, #4096	@ 0x1000
  8001bee:	4a5d      	ldr	r2, [pc, #372]	@ (8001d64 <main+0x214>)
@@ -3413,7 +3413,7 @@ int main(void)
  8001d60:	20006cc8 	.word	0x20006cc8
  8001d64:	40020400 	.word	0x40020400
  8001d68:	00000000 	.word	0x00000000
- 8001d6c:	42c80000 	.word	0x42c80000
+ 8001d6c:	42a00000 	.word	0x42a00000
  8001d70:	20006aa8 	.word	0x20006aa8
  8001d74:	42aa0000 	.word	0x42aa0000
  8001d78:	20006af8 	.word	0x20006af8

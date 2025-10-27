@@ -323,7 +323,7 @@ void Task_control(void *argument)
     {
     	cnt_control++;
         Drive_VW(&Left_motor, &Right_motor, v_mps, omega);
-        vTaskDelay(pdMS_TO_TICKS(1));  // mỗi 100ms in 1 lần
+        vTaskDelay(pdMS_TO_TICKS(10));  // mỗi 100ms in 1 lần
     }
 }
 
