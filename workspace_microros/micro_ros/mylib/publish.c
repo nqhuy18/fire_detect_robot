@@ -50,8 +50,6 @@ geometry_msgs__msg__Quaternion euler_to_quaternion(double roll, double pitch, do
 // Differential Drive Kinematic Model
 Velocity convertVrVlYaw(double vl_cur, double vr_cur, double yaw, double L) {
     Velocity vel;
-    vl_cur_mps = vl_cur * ((2.0f * 3.1415926f * WHEEL_RADIUS_M)) / 60;   // rpm -> mps
-    vr_cur_mps = vr_cur * ((2.0f * 3.1415926f * WHEEL_RADIUS_M)) / 60;   // rpm -> mps
 
     yaw = yaw / RAD_TO_DEG; // yaw (rad)
     v_cur_mps = (vl_cur_mps + vr_cur_mps) / 2.0;   // mps

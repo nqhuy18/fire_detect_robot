@@ -247,47 +247,67 @@ void Task_IMU(void *argument)
 * @param argument: Not used
 * @retval None
 */
+//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+//{
+//  if (htim->Instance == TIM1) {
+//      Motor_GetSpeed(&Left_motor);
+//      vl_cur = Left_motor.cur_speed;
+//	  PID_Compute(&LPID);
+//	  Motor_GetSpeed(&Right_motor);
+//	  vr_cur = Right_motor.cur_speed;
+//	  PID_Compute(&RPID);
+//      Motor_SetPwm(&Left_motor);
+//      Motor_SetPwm(&Right_motor);
+//
+//   }
+//}
+
+double Convert_mps_pwd(double v) {
+	return (v * 999) / (318.18 * 2 * 3.1415926f * WHEEL_RADIUS_M / 60); // pwd
+}
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == TIM1) {
-      Motor_GetSpeed(&Left_motor);
-      vl_cur = Left_motor.cur_speed;
-	  PID_Compute(&LPID);
-	  Motor_GetSpeed(&Right_motor);
-	  vr_cur = Right_motor.cur_speed;
-	  PID_Compute(&RPID);
+     Motor_GetSpeed(&Left_motor);
+     vl_cur = Left_motor.cur_speed;
+	 PID_Compute(&LPID);
+	 Motor_GetSpeed(&Right_motor);
+	 vr_cur = Right_motor.cur_speed;
+	 PID_Compute(&RPID);
+	 //Left_motor.Pid_output = Convert_mps_pwd(vL);
+	 //Right_motor.Pid_output = Convert_mps_pwd(vR);
       Motor_SetPwm(&Left_motor);
       Motor_SetPwm(&Right_motor);
 
    }
 }
 /* USER CODE END Header_Task_control */
-double distance = 0;
-#define target_distance 1.2
-double v_cur;
-void Task_control(void *argument)
-{
-  /* USER CODE BEGIN Task_control */
-  /* Infinite loop */
- uint64_t last_time = rmw_uros_epoch_nanos();
-  while(1) {
-        uint64_t time_ns = rmw_uros_epoch_nanos();
-	  	v_cur = (vl_cur + vr_cur) / 2; //rpm
-	  	v_cur = v_cur * ((2.0f * 3.1415926f * WHEEL_RADIUS_M)) / 60; // m/s
-        double dt = (time_ns - last_time) / 1e9;
-        last_time = time_ns;
-        distance += v_cur * dt;
-        if (distance >= target_distance) {
-        	 Drive_VW(&Left_motor, &Right_motor, 0, 0);
-        }
-		else {
-			Drive_VW(&Left_motor, &Right_motor, v_mps, omega);
-		}
-		cnt_control++;
-		vTaskDelay(pdMS_TO_TICKS(1));
-  }
-  /* USER CODE END Task_control */
-}
+//double distance = 0;
+//#define target_distance 1.2
+//double v_cur;
+//void Task_control(void *argument)
+//{
+//  /* USER CODE BEGIN Task_control */
+//  /* Infinite loop */
+// uint64_t last_time = rmw_uros_epoch_nanos();
+//  while(1) {
+//        uint64_t time_ns = rmw_uros_epoch_nanos();
+//	  	v_cur = (vl_cur + vr_cur) / 2; //rpm
+//	  	v_cur = v_cur * ((2.0f * 3.1415926f * WHEEL_RADIUS_M)) / 60; // m/s
+//        double dt = (time_ns - last_time) / 1e9;
+//        last_time = time_ns;
+//        distance += v_cur * dt;
+//        if (distance >= target_distance) {
+//        	 Drive_VW(&Left_motor, &Right_motor, 0, 0);
+//        }
+//		else {
+//			Drive_VW(&Left_motor, &Right_motor, v_mps, omega);
+//		}
+//		cnt_control++;
+//		vTaskDelay(pdMS_TO_TICKS(1));
+//  }
+//  /* USER CODE END Task_control */
+//}
 
 //Test speed
 //TickType_t elapsed;
@@ -312,16 +332,18 @@ void Task_control(void *argument)
 //        vTaskDelay(pdMS_TO_TICKS(1));  // mỗi 100ms in 1 lần
 //    }
 //}
-//void Task_control(void *argument)
-//{
-//
-//    while (1)
-//    {
-//    	cnt_control++;
-//        Drive_VW(&Left_motor, &Right_motor, v_mps, omega);
-//        vTaskDelay(pdMS_TO_TICKS(1));  // mỗi 100ms in 1 lần
-//    }
-//}
+void Task_control(void *argument)
+{
+
+    while (1)
+    {
+    	cnt_control++;
+        vl_cur_mps = vl_cur * ((2.0f * 3.1415926f * WHEEL_RADIUS_M)) / 60;   // rpm -> mps
+        vr_cur_mps = vr_cur * ((2.0f * 3.1415926f * WHEEL_RADIUS_M)) / 60;   // rpm -> mps
+        Drive_VW(&Left_motor, &Right_motor, v_mps, omega);
+        vTaskDelay(pdMS_TO_TICKS(1));  // mỗi 100ms in 1 lần
+    }
+}
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
