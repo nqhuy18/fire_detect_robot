@@ -27,9 +27,9 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000030  00000000  00000000  00024e10  2**0
                   CONTENTS, READONLY
- 12 .debug_info   00024779  00000000  00000000  00024e40  2**0
+ 12 .debug_info   00024778  00000000  00000000  00024e40  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 000052ae  00000000  00000000  000495b9  2**0
+ 13 .debug_abbrev 000052ae  00000000  00000000  000495b8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  14 .debug_aranges 00001b28  00000000  00000000  0004e868  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
@@ -3188,7 +3188,6 @@ int main(void)
   MX_I2C1_Init();
  8001b80:	f7ff ff4a 	bl	8001a18 <MX_I2C1_Init>
   /* USER CODE BEGIN 2 */
-  //reset_I2C();
   MPU6050_Init();
  8001b84:	f009 faa0 	bl	800b0c8 <MPU6050_Init>
   MPU6050_CalibGz(&MPU6050,1000);
@@ -4682,9 +4681,9 @@ void MX_TIM1_Init(void)
  8002428:	4b1b      	ldr	r3, [pc, #108]	@ (8002498 <MX_TIM1_Init+0x98>)
  800242a:	2200      	movs	r2, #0
  800242c:	609a      	str	r2, [r3, #8]
-  htim1.Init.Period = 999;
+  htim1.Init.Period = 9999;
  800242e:	4b1a      	ldr	r3, [pc, #104]	@ (8002498 <MX_TIM1_Init+0x98>)
- 8002430:	f240 32e7 	movw	r2, #999	@ 0x3e7
+ 8002430:	f242 720f 	movw	r2, #9999	@ 0x270f
  8002434:	60da      	str	r2, [r3, #12]
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
  8002436:	4b18      	ldr	r3, [pc, #96]	@ (8002498 <MX_TIM1_Init+0x98>)

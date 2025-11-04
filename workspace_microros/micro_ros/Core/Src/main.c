@@ -64,41 +64,6 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-//HAL_StatusTypeDef ret;
-//uint8_t ok = 0;
-//
-//void reset_I2C(){
-//	GPIO_InitTypeDef GPIO_InitStruct = {0};
-//	ret = HAL_I2C_Mem_Read(&hi2c1, 0xD0, 0x75, 1, &ok, 1, 1000);
-//	if (ret != HAL_OK){
-//		HAL_I2C_DeInit(&hi2c1);
-//
-//		GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-//		GPIO_InitStruct.Pin = GPIO_PIN_8;
-//		GPIO_InitStruct.Pull = GPIO_NOPULL;
-//		GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
-//		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-//
-//		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
-//
-//		for (int i = 0; i < 10; i++) {
-//			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
-//			HAL_Delay(20);
-//			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
-//			HAL_Delay(20);
-//		}
-//		MX_I2C1_Init();
-//		ret = HAL_I2C_Mem_Read(&hi2c1, 0xD0, 0x75, 1, &ok, 1, 1000);
-//		if (ret == HAL_OK){
-//			MPU6050_Init();
-//		}
-//		else{
-//			reset_I2C();
-//		}
-//		return;
-//	}
-//	MPU6050_Init();
-//}
 Motor Left_motor;
 Motor *pLeft = &Left_motor;
 Motor Right_motor;
@@ -145,7 +110,6 @@ int main(void)
   MX_USART1_UART_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  //reset_I2C();
   MPU6050_Init();
   MPU6050_CalibGz(&MPU6050,1000);
   HAL_TIM_Base_Start_IT(&htim1);

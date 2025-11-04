@@ -14752,44 +14752,44 @@ LOAD /opt/st/stm32cubeide_1.19.0/plugins/com.st.stm32cube.ide.mcu.externaltools.
 LOAD /opt/st/stm32cubeide_1.19.0/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a
 LOAD /opt/st/stm32cubeide_1.19.0/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.0.0.202410170706/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard/libgcc.a
 
-.debug_info     0x00000000    0x24779
+.debug_info     0x00000000    0x24778
  .debug_info    0x00000000      0x503 ./Core/Src/custom_memory_manager.o
  .debug_info    0x00000503      0x445 ./Core/Src/dma.o
  .debug_info    0x00000948     0x3313 ./Core/Src/freertos.o
  .debug_info    0x00003c5b      0x417 ./Core/Src/gpio.o
  .debug_info    0x00004072      0x9a5 ./Core/Src/i2c.o
- .debug_info    0x00004a17     0x1682 ./Core/Src/main.o
- .debug_info    0x00006099      0x209 ./Core/Src/microros_allocators.o
- .debug_info    0x000062a2      0x20a ./Core/Src/microros_time.o
- .debug_info    0x000064ac      0x44f ./Core/Src/stm32f4xx_hal_msp.o
- .debug_info    0x000068fb      0xa10 ./Core/Src/stm32f4xx_it.o
- .debug_info    0x0000730b      0x6a3 ./Core/Src/syscalls.o
- .debug_info    0x000079ae      0x168 ./Core/Src/sysmem.o
- .debug_info    0x00007b16      0x53e ./Core/Src/system_stm32f4xx.o
- .debug_info    0x00008054     0x10a1 ./Core/Src/tim.o
- .debug_info    0x000090f5      0xbd1 ./Core/Src/usart.o
- .debug_info    0x00009cc6      0xb80 ./Core/Src/microros_transports/dma_transport.o
- .debug_info    0x0000a846       0x30 ./Core/Startup/startup_stm32f411ceux.o
- .debug_info    0x0000a876      0x8c4 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
- .debug_info    0x0000b13a      0xcfc ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.o
- .debug_info    0x0000be36      0x8e6 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.o
- .debug_info    0x0000c71c      0x6f9 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.o
- .debug_info    0x0000ce15     0x2426 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.o
- .debug_info    0x0000f23b      0x904 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.o
- .debug_info    0x0000fb3f     0x2996 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.o
- .debug_info    0x000124d5     0x14d4 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.o
- .debug_info    0x000139a9     0x2f56 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.o
- .debug_info    0x000168ff     0x405e ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
- .debug_info    0x0001a95d      0x2af ./Middlewares/Third_Party/FreeRTOS/Source/list.o
- .debug_info    0x0001ac0c     0x1b79 ./Middlewares/Third_Party/FreeRTOS/Source/queue.o
- .debug_info    0x0001c785     0x28c1 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
- .debug_info    0x0001f046     0x1b50 ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
- .debug_info    0x00020b96      0x4de ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.o
- .debug_info    0x00021074      0x4d5 ./Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.o
- .debug_info    0x00021549      0xb45 ./mylib/Motor.o
- .debug_info    0x0002208e      0xd04 ./mylib/mpu6050.o
- .debug_info    0x00022d92      0x691 ./mylib/pid.o
- .debug_info    0x00023423     0x1356 ./mylib/publish.o
+ .debug_info    0x00004a17     0x1681 ./Core/Src/main.o
+ .debug_info    0x00006098      0x209 ./Core/Src/microros_allocators.o
+ .debug_info    0x000062a1      0x20a ./Core/Src/microros_time.o
+ .debug_info    0x000064ab      0x44f ./Core/Src/stm32f4xx_hal_msp.o
+ .debug_info    0x000068fa      0xa10 ./Core/Src/stm32f4xx_it.o
+ .debug_info    0x0000730a      0x6a3 ./Core/Src/syscalls.o
+ .debug_info    0x000079ad      0x168 ./Core/Src/sysmem.o
+ .debug_info    0x00007b15      0x53e ./Core/Src/system_stm32f4xx.o
+ .debug_info    0x00008053     0x10a1 ./Core/Src/tim.o
+ .debug_info    0x000090f4      0xbd1 ./Core/Src/usart.o
+ .debug_info    0x00009cc5      0xb80 ./Core/Src/microros_transports/dma_transport.o
+ .debug_info    0x0000a845       0x30 ./Core/Startup/startup_stm32f411ceux.o
+ .debug_info    0x0000a875      0x8c4 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
+ .debug_info    0x0000b139      0xcfc ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.o
+ .debug_info    0x0000be35      0x8e6 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.o
+ .debug_info    0x0000c71b      0x6f9 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.o
+ .debug_info    0x0000ce14     0x2426 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.o
+ .debug_info    0x0000f23a      0x904 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.o
+ .debug_info    0x0000fb3e     0x2996 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.o
+ .debug_info    0x000124d4     0x14d4 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.o
+ .debug_info    0x000139a8     0x2f56 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.o
+ .debug_info    0x000168fe     0x405e ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
+ .debug_info    0x0001a95c      0x2af ./Middlewares/Third_Party/FreeRTOS/Source/list.o
+ .debug_info    0x0001ac0b     0x1b79 ./Middlewares/Third_Party/FreeRTOS/Source/queue.o
+ .debug_info    0x0001c784     0x28c1 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
+ .debug_info    0x0001f045     0x1b50 ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
+ .debug_info    0x00020b95      0x4de ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.o
+ .debug_info    0x00021073      0x4d5 ./Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.o
+ .debug_info    0x00021548      0xb45 ./mylib/Motor.o
+ .debug_info    0x0002208d      0xd04 ./mylib/mpu6050.o
+ .debug_info    0x00022d91      0x691 ./mylib/pid.o
+ .debug_info    0x00023422     0x1356 ./mylib/publish.o
 
 .debug_abbrev   0x00000000     0x52ae
  .debug_abbrev  0x00000000      0x27d ./Core/Src/custom_memory_manager.o
