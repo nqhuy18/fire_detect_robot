@@ -187,11 +187,6 @@ void Task_pub_sub(void *argument)
 		ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
 		"/cmd_vel");
 
-//	rclc_publisher_init_default(
-//	    &tf_pub,
-//	    &node,
-//	    ROSIDL_GET_MSG_TYPE_SUPPORT(tf2_msgs, msg, TFMessage),
-//	    "/tf");
 	// create timer
 	rcl_timer_t timer;
 	const unsigned int timer_timeout = 100;
@@ -218,8 +213,6 @@ void Task_pub_sub(void *argument)
     odom_msg.header.frame_id.data = "odom";
     odom_msg.child_frame_id.data  = "base_link";
 
-//    tf.header.frame_id.data = "odom";
-//    tf.child_frame_id.data = "base_link";
 	while(1) {
 		cnt_pub++;
 		rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
@@ -267,55 +260,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
    }
 }
 /* USER CODE END Header_Task_control */
-//double distance = 0;
-//#define target_distance 1.2
-//void Task_control(void *argument)
-//{
-//  /* USER CODE BEGIN Task_control */
-//  /* Infinite loop */
-// uint64_t last_time = rmw_uros_epoch_nanos();
-//  while(1) {
-//        uint64_t time_ns = rmw_uros_epoch_nanos();
-//	  	double v_cur = (vl_cur + vr_cur) / 2;
-//	  	v_cur = v_cur * ((2.0f * 3.1415926f * WHEEL_RADIUS_M)) / 60; // m/s
-//        double dt = (time_ns - last_time) / 1e9;
-//        last_time = time_ns;
-//        distance += v_cur * dt;
-//        if (distance > target_distance) {
-//        	 Drive_VW(&Left_motor, &Right_motor, 0, 0);
-//        }
-//		else {
-//			Drive_VW(&Left_motor, &Right_motor, v_mps, omega);
-//		}
-//		cnt_control++;
-//		vTaskDelay(pdMS_TO_TICKS(1));
-//  }
-//  /* USER CODE END Task_control */
-//}
 
-//Test speed
-//TickType_t elapsed;
-//void Task_control(void *argument)
-//{
-//    TickType_t start_tick = xTaskGetTickCount();
-//    const TickType_t run_ticks = pdMS_TO_TICKS(5000);  // 5s
-//
-//    while (1)
-//    {
-//        elapsed = xTaskGetTickCount() - start_tick;
-//
-//        if (elapsed < run_ticks)
-//        {
-//            Drive_VW(&Left_motor, &Right_motor, v_mps, omega);
-//        }
-//        else
-//        {
-//            Drive_VW(&Left_motor, &Right_motor, 0, 0);
-//        }
-//    	cnt_control++;
-//        vTaskDelay(pdMS_TO_TICKS(1));  // mỗi 100ms in 1 lần
-//    }
-//}
 void Task_control(void *argument)
 {
 

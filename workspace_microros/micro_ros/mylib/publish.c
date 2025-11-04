@@ -73,8 +73,8 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 
         uint64_t time_ns = rmw_uros_epoch_nanos();
         if (last_time_ns == 0) {
-                    last_time_ns = time_ns;
-                    return; // Bỏ qua lần tích phân đầu tiên
+                last_time_ns = time_ns;
+                return;
         }
         odom_msg.header.stamp.sec     = time_ns / 1000000000ULL;
         odom_msg.header.stamp.nanosec = time_ns % 1000000000ULL;
@@ -91,14 +91,6 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         dt = (time_ns - last_time_ns) / 1e9;
         last_time_ns = time_ns;
 
-        x_pos = x_pos + vel.vx * dt;
-        y_pos = y_pos + vel.vy * dt;
-
-        odom_msg.pose.pose.position.x = x_pos;
-        odom_msg.pose.pose.position.y = y_pos;
-        odom_msg.pose.pose.position.z = z_pos;
-        odom_msg.pose.pose.orientation =	 q;
-
         odom_msg.twist.twist.linear.x = v_cur_mps;
         odom_msg.twist.twist.linear.y = 0.00;
         odom_msg.twist.twist.angular.z = vel.v_yaw;
@@ -108,50 +100,12 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         imu_msg.header.frame_id.data = "base_link";
 
         imu_msg.orientation = q;
-
-        imu_msg.angular_velocity.x = MPU6050.Gx * DEG_TO_RAD;
-        imu_msg.angular_velocity.y = MPU6050.Gy * DEG_TO_RAD;
         imu_msg.angular_velocity.z = MPU6050.Gz * DEG_TO_RAD;
 
         // --- Gia tốc tuyến tính (Accelerometer) ---
         imu_msg.linear_acceleration.x = MPU6050.Ax * 9.80665;  // m/s²
-        imu_msg.linear_acceleration.y = MPU6050.Ay * 9.80665;
-        imu_msg.linear_acceleration.z = MPU6050.Az * 9.80665;
-
-        for (int i = 0; i < 9; i++) {
-            imu_msg.orientation_covariance[i] = 0.0;
-            imu_msg.angular_velocity_covariance[i] = 0.0;
-            imu_msg.linear_acceleration_covariance[i] = 0.0;
-        }
-
-        imu_msg.orientation_covariance[0] = 0.01;
-        imu_msg.orientation_covariance[4] = 0.01;
-        imu_msg.orientation_covariance[8] = 0.01;
-
-        imu_msg.angular_velocity_covariance[0] = 0.001;
-        imu_msg.angular_velocity_covariance[4] = 0.001;
-        imu_msg.angular_velocity_covariance[8] = 0.001;
-
-        imu_msg.linear_acceleration_covariance[0] = 0.01;
-        imu_msg.linear_acceleration_covariance[4] = 0.01;
-        imu_msg.linear_acceleration_covariance[8] = 0.01;
-
-
-//        tf.header.stamp.sec = time_ns / 1000000000ULL;
-//        tf.header.stamp.nanosec = time_ns % 1000000000ULL;
-//
-//        tf.transform.translation.x = x_pos;
-//        tf.transform.translation.y = y_pos;
-//        tf.transform.translation.z = z_pos;
-//
-//        tf.transform.rotation = q;
-//
-//        tf_msg.transforms.data = &tf;
-//        tf_msg.transforms.size = 1;
-//        tf_msg.transforms.capacity = 1;
 
 		RCSOFTCHECK(rcl_publish(&odom_pub, &odom_msg, NULL));
-//		RCSOFTCHECK(rcl_publish(&tf_pub, &tf_msg, NULL));
 		RCSOFTCHECK(rcl_publish(&imu_pub, &imu_msg, NULL));
 	}
 }
