@@ -1,9 +1,7 @@
-# 2D Mapping and Path Planning
-This branch includes code for robot simulation on Gazebo, as well as publishing and subscribing to topics between ROS (Raspberry Pi) and Micro-ROS (STM32F4CUE6), etc.
+# TEST-VERSION
+This branch includes code for test PID & NoPID, Calibration & NoCalibration, etc.
 
 ## Todo List
-- [x] Set up the environment
-- [x] Install necessary packages
-- [x] Create a simulated robot in Gazebo
-- [X] Exchange data between Raspberry Pi and STM32F4CUE6 via agent_ros
-
+- [x] Code test pid/no_pid for the distance
+- [X] Code test pid/no_pid for the speed 
+- [X] Code test calibaration/no_calibaration for the yaw
