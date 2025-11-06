@@ -11,6 +11,8 @@ int cnt_pub = 0, cnt_imu = 0, cnt_control = 0;
 
 double v_mps, omega;
 double vl, vr;
+#define ODOM_COV 0.005
+#define IMU_COV 0.005
 
 MPU6050_t MPU6050;
 rcl_publisher_t odom_pub;
@@ -86,25 +88,36 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 
 
         Velocity vel = convertVrVlYaw(vr_cur, vl_cur, yaw, TRACK_WIDTH_M); // vr_cur: rpm
-        // update data /odom
-
         dt = (time_ns - last_time_ns) / 1e9;
         last_time_ns = time_ns;
 
         odom_msg.twist.twist.linear.x = v_cur_mps;
         odom_msg.twist.twist.linear.y = 0.00;
         odom_msg.twist.twist.angular.z = vel.v_yaw;
+        odom_msg.twist.covariance[0] = ODOM_COV; // vx
+        odom_msg.twist.covariance[7] = 0.0001;   //vy
+        odom_msg.twist.covariance[14] = 1e6;
+        odom_msg.twist.covariance[21] = 1e6;
+        odom_msg.twist.covariance[28] = 1e6;
+        odom_msg.twist.covariance[35] = ODOM_COV;  // v_yaw
 
         imu_msg.header.stamp.sec = time_ns / 1000000000ULL;
         imu_msg.header.stamp.nanosec = time_ns % 1000000000ULL;
         imu_msg.header.frame_id.data = "base_link";
 
         imu_msg.orientation = q;
-        imu_msg.angular_velocity.z = MPU6050.Gz * DEG_TO_RAD;
-
-        // --- Gia tốc tuyến tính (Accelerometer) ---
+        //imu_msg.angular_velocity.z = MPU6050.Gz * DEG_TO_RAD;
         imu_msg.linear_acceleration.x = MPU6050.Ax * 9.80665;  // m/s²
 
+        imu_msg.orientation_covariance[0] = 1e6;
+        imu_msg.orientation_covariance[4] = 1e6;
+        imu_msg.orientation_covariance[8] = IMU_COV;
+
+        imu_msg.linear_acceleration_covariance[0] = -1;
+
+        imu_msg.angular_velocity_covariance[0] = 1e6;
+        imu_msg.angular_velocity_covariance[4] = 1e6;
+        imu_msg.angular_velocity_covariance[8] = IMU_COV; //v_yaw
 		RCSOFTCHECK(rcl_publish(&odom_pub, &odom_msg, NULL));
 		RCSOFTCHECK(rcl_publish(&imu_pub, &imu_msg, NULL));
 	}
