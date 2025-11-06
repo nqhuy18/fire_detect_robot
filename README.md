@@ -1,9 +1,8 @@
-# 2D Mapping and Path Planning
-This branch includes code for robot simulation on Gazebo, as well as publishing and subscribing to topics between ROS (Raspberry Pi) and Micro-ROS (STM32F4CUE6), etc.
+# Extended Kalman Filter to confuse data Odom & Imu
+This branch includes code for pulish EKF_node
 
 ## Todo List
-- [x] Set up the environment
-- [x] Install necessary packages
-- [x] Create a simulated robot in Gazebo
-- [X] Exchange data between Raspberry Pi and STM32F4CUE6 via agent_ros
+- [x] Pulish Vx, V_yaw, Maxtri Covariance (odom/data)
+- [X] Publish Yaw, V_yaw, Maxtric Covariacne (imu/data)
+- [X] Code node ekf_node_filter (ekf.yaml)  
 
