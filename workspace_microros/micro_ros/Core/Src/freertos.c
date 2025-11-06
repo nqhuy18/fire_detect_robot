@@ -218,7 +218,7 @@ void Task_pub_sub(void *argument)
 	while(1) {
 		cnt_pub++;
 		rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
-		vTaskDelay(pdMS_TO_TICKS(100));
+		vTaskDelay(pdMS_TO_TICKS(10));
 	}
   /* USER CODE END 5 */
 }
@@ -341,7 +341,7 @@ void Task_control(void *argument)
         vl_cur_mps = vl_cur * ((2.0f * 3.1415926f * WHEEL_RADIUS_M)) / 60;   // rpm -> mps
         vr_cur_mps = vr_cur * ((2.0f * 3.1415926f * WHEEL_RADIUS_M)) / 60;   // rpm -> mps
         Drive_VW(&Left_motor, &Right_motor, v_mps, omega);
-        vTaskDelay(pdMS_TO_TICKS(1));  // mỗi 100ms in 1 lần
+        vTaskDelay(pdMS_TO_TICKS(10));  // mỗi 100ms in 1 lần
     }
 }
 
