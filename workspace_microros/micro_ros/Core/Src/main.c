@@ -84,7 +84,6 @@ int main(void)
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
-
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
@@ -111,7 +110,8 @@ int main(void)
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   MPU6050_Init();
-  MPU6050_CalibGz(&MPU6050,1000);
+  //MPU6050_CalibGz(&MPU6050,1000);
+  MPU6050.Gz_bias = -0.275;
   HAL_TIM_Base_Start_IT(&htim1);
   HAL_TIM_Encoder_Start_IT(&htim2, TIM_CHANNEL_ALL); //LEFT
   HAL_TIM_Encoder_Start_IT(&htim4, TIM_CHANNEL_ALL); //RIGHT

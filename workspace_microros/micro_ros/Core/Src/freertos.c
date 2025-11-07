@@ -189,7 +189,7 @@ void Task_pub_sub(void *argument)
 
 	// create timer
 	rcl_timer_t timer;
-	const unsigned int timer_timeout = 100;
+	const unsigned int timer_timeout = 1000;
 	RCCHECK(rclc_timer_init_default(
 		&timer,
 		&support,

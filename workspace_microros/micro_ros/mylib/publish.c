@@ -52,8 +52,8 @@ geometry_msgs__msg__Quaternion euler_to_quaternion(double roll, double pitch, do
 
 
 // Differential Drive Kinematic Model
+Velocity vel;
 Velocity convertVrVlYaw(double vl_cur, double vr_cur, double yaw, double L) {
-    Velocity vel;
     vl_cur_mps = vl_cur * ((2.0f * 3.1415926f * WHEEL_RADIUS_M)) / 60;   // rpm -> mps
     vr_cur_mps = vr_cur * ((2.0f * 3.1415926f * WHEEL_RADIUS_M)) / 60;   // rpm -> mps
 
@@ -94,31 +94,36 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         odom_msg.twist.twist.linear.x = v_cur_mps;
         odom_msg.twist.twist.linear.y = 0.00;
         odom_msg.twist.twist.angular.z = vel.v_yaw;
+
         odom_msg.twist.covariance[0] = ODOM_COV; // vx
         odom_msg.twist.covariance[7] = 0.0001;   //vy
         odom_msg.twist.covariance[14] = 1e6;
         odom_msg.twist.covariance[21] = 1e6;
         odom_msg.twist.covariance[28] = 1e6;
-        odom_msg.twist.covariance[35] = ODOM_COV;  // v_yaw
+        odom_msg.twist.covariance[35] = 0.5;  // v_yaw
 
         imu_msg.header.stamp.sec = time_ns / 1000000000ULL;
         imu_msg.header.stamp.nanosec = time_ns % 1000000000ULL;
         imu_msg.header.frame_id.data = "base_link";
 
-        imu_msg.orientation = q;
-        //imu_msg.angular_velocity.z = MPU6050.Gz * DEG_TO_RAD;
-        imu_msg.linear_acceleration.x = MPU6050.Ax * 9.80665;  // m/s²
+        imu_msg.orientation = q; 								// yaw
+        imu_msg.angular_velocity.z = MPU6050.Gz * DEG_TO_RAD;   // v_yaw
+        imu_msg.linear_acceleration.x = MPU6050.Ax * 9.80665;  // a_x m/s²
 
         imu_msg.orientation_covariance[0] = 1e6;
         imu_msg.orientation_covariance[4] = 1e6;
-        imu_msg.orientation_covariance[8] = IMU_COV;
-
-        imu_msg.linear_acceleration_covariance[0] = -1;
+        imu_msg.orientation_covariance[8] = IMU_COV; // yaw
 
         imu_msg.angular_velocity_covariance[0] = 1e6;
         imu_msg.angular_velocity_covariance[4] = 1e6;
         imu_msg.angular_velocity_covariance[8] = IMU_COV; //v_yaw
-		RCSOFTCHECK(rcl_publish(&odom_pub, &odom_msg, NULL));
+
+        imu_msg.linear_acceleration_covariance[0] = 0.5;  //a_x
+        imu_msg.linear_acceleration_covariance[4] = 1e6;
+        imu_msg.linear_acceleration_covariance[88] = 1e6;
+
+
+        RCSOFTCHECK(rcl_publish(&odom_pub, &odom_msg, NULL));
 		RCSOFTCHECK(rcl_publish(&imu_pub, &imu_msg, NULL));
 	}
 }
