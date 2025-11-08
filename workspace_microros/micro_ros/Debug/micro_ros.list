@@ -3287,7 +3287,7 @@ int main(void)
 	// --- Base timer for control loop (interrupt) ---
     // Khoi tao 2 banh xe
     //80 3 0
-  Motor_Init(&Left_motor, LEFT,GPIOB, GPIO_PIN_12, GPIOB, GPIO_PIN_13,&htim3, TIM_CHANNEL_1, &htim2, 90, 10, 0);
+  Motor_Init(&Left_motor, LEFT,GPIOB, GPIO_PIN_12, GPIOB, GPIO_PIN_13,&htim3, TIM_CHANNEL_1, &htim2, 80, 3, 0);
  8001c5c:	4b64      	ldr	r3, [pc, #400]	@ (8001df0 <main+0x218>)
  8001c5e:	9304      	str	r3, [sp, #16]
  8001c60:	2300      	movs	r3, #0
@@ -3299,14 +3299,14 @@ int main(void)
  8001c6e:	4b63      	ldr	r3, [pc, #396]	@ (8001dfc <main+0x224>)
  8001c70:	9300      	str	r3, [sp, #0]
  8001c72:	ed9f 1a63 	vldr	s2, [pc, #396]	@ 8001e00 <main+0x228>
- 8001c76:	eef2 0a04 	vmov.f32	s1, #36	@ 0x41200000  10.0
+ 8001c76:	eef0 0a08 	vmov.f32	s1, #8	@ 0x40400000  3.0
  8001c7a:	ed9f 0a62 	vldr	s0, [pc, #392]	@ 8001e04 <main+0x22c>
  8001c7e:	f44f 5380 	mov.w	r3, #4096	@ 0x1000
  8001c82:	4a5e      	ldr	r2, [pc, #376]	@ (8001dfc <main+0x224>)
  8001c84:	2100      	movs	r1, #0
  8001c86:	4860      	ldr	r0, [pc, #384]	@ (8001e08 <main+0x230>)
  8001c88:	f008 ff86 	bl	800ab98 <Motor_Init>
-  Motor_Init(&Right_motor,RIGHT,GPIOB, GPIO_PIN_14, GPIOB, GPIO_PIN_15,&htim3, TIM_CHANNEL_2, &htim4, 90, 3, 0.1);
+  Motor_Init(&Right_motor,RIGHT,GPIOB, GPIO_PIN_14, GPIOB, GPIO_PIN_15,&htim3, TIM_CHANNEL_2, &htim4, 85, 3, 0);
  8001c8c:	4b59      	ldr	r3, [pc, #356]	@ (8001df4 <main+0x21c>)
  8001c8e:	9304      	str	r3, [sp, #16]
  8001c90:	2304      	movs	r3, #4
@@ -3317,9 +3317,9 @@ int main(void)
  8001c9c:	9301      	str	r3, [sp, #4]
  8001c9e:	4b57      	ldr	r3, [pc, #348]	@ (8001dfc <main+0x224>)
  8001ca0:	9300      	str	r3, [sp, #0]
- 8001ca2:	ed9f 1a5a 	vldr	s2, [pc, #360]	@ 8001e0c <main+0x234>
+ 8001ca2:	ed9f 1a57 	vldr	s2, [pc, #348]	@ 8001e00 <main+0x228>
  8001ca6:	eef0 0a08 	vmov.f32	s1, #8	@ 0x40400000  3.0
- 8001caa:	ed9f 0a56 	vldr	s0, [pc, #344]	@ 8001e04 <main+0x22c>
+ 8001caa:	ed9f 0a58 	vldr	s0, [pc, #352]	@ 8001e0c <main+0x234>
  8001cae:	f44f 4380 	mov.w	r3, #16384	@ 0x4000
  8001cb2:	4a52      	ldr	r2, [pc, #328]	@ (8001dfc <main+0x224>)
  8001cb4:	2101      	movs	r1, #1
@@ -3469,9 +3469,9 @@ int main(void)
  8001df8:	20006dd0 	.word	0x20006dd0
  8001dfc:	40020400 	.word	0x40020400
  8001e00:	00000000 	.word	0x00000000
- 8001e04:	42b40000 	.word	0x42b40000
+ 8001e04:	42a00000 	.word	0x42a00000
  8001e08:	20006bb0 	.word	0x20006bb0
- 8001e0c:	3dcccccd 	.word	0x3dcccccd
+ 8001e0c:	42aa0000 	.word	0x42aa0000
  8001e10:	20006c00 	.word	0x20006c00
  8001e14:	20000000 	.word	0x20000000
  8001e18:	20006cc0 	.word	0x20006cc0

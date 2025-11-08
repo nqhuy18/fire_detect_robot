@@ -126,8 +126,8 @@ int main(void)
 	// --- Base timer for control loop (interrupt) ---
     // Khoi tao 2 banh xe
     //80 3 0
-  Motor_Init(&Left_motor, LEFT,GPIOB, GPIO_PIN_12, GPIOB, GPIO_PIN_13,&htim3, TIM_CHANNEL_1, &htim2, 90, 10, 0);
-  Motor_Init(&Right_motor,RIGHT,GPIOB, GPIO_PIN_14, GPIOB, GPIO_PIN_15,&htim3, TIM_CHANNEL_2, &htim4, 90, 3, 0.1);
+  Motor_Init(&Left_motor, LEFT,GPIOB, GPIO_PIN_12, GPIOB, GPIO_PIN_13,&htim3, TIM_CHANNEL_1, &htim2, 80, 3, 0);
+  Motor_Init(&Right_motor,RIGHT,GPIOB, GPIO_PIN_14, GPIOB, GPIO_PIN_15,&htim3, TIM_CHANNEL_2, &htim4, 85, 3, 0);
 
    // Khoi tao PID
   PID(&LPID, &(pLeft->cur_speed),&(pLeft->Pid_output),&(pLeft->target_speed),pLeft->kp, pLeft->ki, pLeft->kd,_PID_P_ON_E, _PID_CD_DIRECT);
