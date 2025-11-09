@@ -1,9 +1,14 @@
-# 2D Mapping and Path Planning
-This branch includes code for robot simulation on Gazebo, as well as publishing and subscribing to topics between ROS (Raspberry Pi) and Micro-ROS (STM32F4CUE6), etc.
+# Autonomous Mobile Robot for 2D Mapping and Early Fire Detection in Supermarkets
+Early fire detection (broken wires, smoke, old power outlets, etc.)
+2D environment mapping
+Path planning for inspection
+Robot control and monitoring via smartphone
 
-## Todo List
-- [x] Set up the environment
-- [x] Install necessary packages
-- [x] Create a simulated robot in Gazebo
-- [X] Exchange data between Raspberry Pi and STM32F4CUE6 via agent_ros
+## Branch Structure and Responsibilities
 
+- **main**: Contains the main stable codebase.
+- **huy**: Focused on combining sensor data for indoor localization, generating 2D maps, and planning patrol routes.
+- **long**: Handles sensor reading, motor control, and designing the mobile app for robot monitoring.
+- **hai**: Implements early fire detection, including detecting broken wires, smoke, and aging electrical outlets.
+
+## Research
