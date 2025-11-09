@@ -1,8 +1,9 @@
 # Autonomous Mobile Robot for 2D Mapping and Early Fire Detection in Supermarkets
-Early fire detection (broken wires, smoke, old power outlets, etc.)
-2D environment mapping
-Path planning for inspection
-Robot control and monitoring via smartphone
+## Functions:
+- 2D environment mapping
+- Path planning for inspection
+- Early fire detection (broken wires, smoke, old power outlets, etc.)
+- Robot control and monitoring via smartphone
 
 ## Branch Structure and Responsibilities
 
