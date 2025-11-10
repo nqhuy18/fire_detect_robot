@@ -11,8 +11,8 @@ int cnt_pub = 0, cnt_imu = 0, cnt_control = 0;
 
 double v_mps, omega;
 double vl, vr;
-#define ODOM_COV 0.005
-#define IMU_COV 0.005
+#define ODOM_COV 1e6 //0.005
+#define IMU_COV 0.005;
 
 MPU6050_t MPU6050;
 rcl_publisher_t odom_pub;
@@ -96,11 +96,11 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         odom_msg.twist.twist.angular.z = vel.v_yaw;
 
         odom_msg.twist.covariance[0] = ODOM_COV; // vx
-        odom_msg.twist.covariance[7] = 0.0001;   //vy
+        odom_msg.twist.covariance[7] = ODOM_COV;   //vy
         odom_msg.twist.covariance[14] = 1e6;
         odom_msg.twist.covariance[21] = 1e6;
         odom_msg.twist.covariance[28] = 1e6;
-        odom_msg.twist.covariance[35] = 0.5;  // v_yaw
+        odom_msg.twist.covariance[35] = ODOM_COV;  // v_yaw
 
         imu_msg.header.stamp.sec = time_ns / 1000000000ULL;
         imu_msg.header.stamp.nanosec = time_ns % 1000000000ULL;
@@ -118,9 +118,9 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         imu_msg.angular_velocity_covariance[4] = 1e6;
         imu_msg.angular_velocity_covariance[8] = IMU_COV; //v_yaw
 
-        imu_msg.linear_acceleration_covariance[0] = 0.5;  //a_x
+        imu_msg.linear_acceleration_covariance[0] = IMU_COV;  //a_x
         imu_msg.linear_acceleration_covariance[4] = 1e6;
-        imu_msg.linear_acceleration_covariance[88] = 1e6;
+        imu_msg.linear_acceleration_covariance[8] = 1e6;
 
 
         RCSOFTCHECK(rcl_publish(&odom_pub, &odom_msg, NULL));
