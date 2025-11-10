@@ -13,4 +13,4 @@
 - **hai**: Implements early fire detection, including detecting broken wires, smoke, and aging electrical outlets.
 
 ## Research
-[📄 See here (PDF)](docs/article1.pdf)
+[📄 See here (PDF)](Doc/article1.pdf)
