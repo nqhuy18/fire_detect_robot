@@ -107,10 +107,6 @@ void Motor_SetPwm(Motor *motor)
 			{
 				motor->Pid_output = 0;
 			}
-			if (motor->target_speed == 0 )
-			{
-				motor->Pid_output = 0;
-			}
 			if(motor->Pid_output > 0)
 			{
 				HAL_GPIO_WritePin(motor->IN1_Port, motor->IN1_Pin,GPIO_PIN_RESET);

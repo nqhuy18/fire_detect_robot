@@ -11,7 +11,7 @@ int cnt_pub = 0, cnt_imu = 0, cnt_control = 0;
 
 double v_mps, omega;
 double vl, vr;
-#define ODOM_COV 1e6 //0.005
+#define ODOM_COV 	0.005
 #define IMU_COV 0.005;
 
 MPU6050_t MPU6050;
@@ -62,7 +62,7 @@ Velocity convertVrVlYaw(double vl_cur, double vr_cur, double yaw, double L) {
 
     vel.vx = v_cur_mps * cos(yaw);
     vel.vy = v_cur_mps * sin(yaw);
-    vel.v_yaw = (vr_cur_mps - vl_cur_mps) / L;    // rad/s
+    vel.v_yaw = - (vr_cur_mps - vl_cur_mps) / L;    // rad/s
 
     return vel;
 }
